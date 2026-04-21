@@ -42,7 +42,7 @@ select:focus,input[type=text]:focus{border-color:var(--acc)}
 .toggle:hover{color:var(--txt)}
 
 /* MAIN GRID */
-.main{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;border-bottom:1px solid var(--br)}
+.main{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0}
 .panel{display:flex;flex-direction:column}
 .panel-left{border-right:1px solid var(--br2)}
 .panel-header{background:var(--surf2);border-bottom:1px solid var(--br);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -82,7 +82,7 @@ textarea::placeholder{color:var(--txt3);font-style:italic}
 .z-chain{color:#fb923c}
 
 /* STATUS BAR */
-.status-bar{background:var(--surf2);border-top:1px solid var(--br);padding:7px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.status-bar{position: fixed;bottom: 0;left: 0;right: 0;z-index: 1000;background:var(--surf2);border-top:1px solid var(--br);padding:7px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
 .stat{font-size:11px;color:var(--txt3)}
 .stat span{color:var(--txt2);font-weight:600}
 
