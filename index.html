@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON to Zod Pro — Intelligent TypeScript Schema Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --acc:#6366f1;--acc2:#818cf8;--ok:#10b981;--err:#ef4444;--warn:#f59e0b;
+  --bg:#020617;--surf:#0f172a;--surf2:#1e293b;--surf3:#334155;
+  --br:#1e293b;--br2:#334155;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#475569;
+}
+html,body{height:100%;font-family:'JetBrains Mono',ui-monospace,monospace}
+body{background:var(--bg);color:var(--txt);display:flex;flex-direction:column;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--surf);border-bottom:1px solid var(--br2);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-badge{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;letter-spacing:.6px}
+.logo-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.logo-sub{font-size:11px;color:var(--txt2);letter-spacing:.2px;margin-top:1px}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--br2);color:var(--txt2);background:var(--surf2)}
+.chip.ok{border-color:#10b98133;color:var(--ok);background:#10b9810d}
+.chip.err{border-color:#ef444433;color:var(--err);background:#ef44440d}
+
+/* SAMPLES BAR */
+.samples-bar{background:var(--surf2);border-bottom:1px solid var(--br);padding:8px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.samples-label{font-size:11px;color:var(--txt3);margin-right:4px}
+.sample-btn{font-size:11px;padding:3px 10px;border-radius:5px;border:1px solid var(--br2);background:var(--surf);color:var(--txt2);cursor:pointer;transition:all .12s}
+.sample-btn:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* OPTIONS BAR */
+.options-bar{background:var(--surf);border-bottom:1px solid var(--br);padding:9px 24px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.opt-group{display:flex;align-items:center;gap:7px}
+.opt-label{font-size:11px;color:var(--txt3);white-space:nowrap}
+select,input[type=text]{font-size:12px;background:var(--surf2);color:var(--txt);border:1px solid var(--br2);border-radius:5px;padding:4px 8px;font-family:inherit;cursor:pointer;outline:none;transition:border-color .12s}
+select:focus,input[type=text]:focus{border-color:var(--acc)}
+.toggle{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--txt2);user-select:none;white-space:nowrap}
+.toggle input{accent-color:var(--acc);cursor:pointer}
+.toggle:hover{color:var(--txt)}
+
+/* MAIN GRID */
+.main{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;border-bottom:1px solid var(--br)}
+.panel{display:flex;flex-direction:column}
+.panel-left{border-right:1px solid var(--br2)}
+.panel-header{background:var(--surf2);border-bottom:1px solid var(--br);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.panel-label{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px}
+.panel-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid var(--br2);background:var(--surf);color:var(--txt2);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.btn:hover{background:var(--surf3);color:var(--txt);border-color:var(--acc)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--acc2);border-color:var(--acc2)}
+.btn.success{background:#10b98115;border-color:#10b98155;color:var(--ok)}
+.btn.success:hover{background:#10b98125}
+
+/* EDITOR */
+textarea{width:100%;flex:1;background:var(--surf);color:var(--txt);border:none;outline:none;resize:none;font-size:12.5px;line-height:1.8;padding:16px 20px;font-family:'JetBrains Mono',ui-monospace,monospace;tab-size:2;min-height:440px}
+textarea:focus{background:var(--surf2)}
+textarea::placeholder{color:var(--txt3);font-style:italic}
+
+/* OUTPUT */
+.output-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.tab-bar{display:flex;border-bottom:1px solid var(--br);background:var(--surf2)}
+.tab{font-size:11px;padding:9px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--txt2);transition:all .12s;white-space:nowrap}
+.tab.active{border-bottom-color:var(--acc);color:var(--acc);background:var(--surf)}
+.tab:hover:not(.active){color:var(--txt);background:var(--surf3)}
+.pane{flex:1;overflow:auto;padding:16px 20px;display:none;min-height:440px}
+.pane.active{display:block}
+.output-code{font-size:12.5px;line-height:1.85;white-space:pre-wrap;word-break:break-all}
+
+/* SYNTAX COLORS */
+.z-keyword{color:#c084fc}
+.z-method{color:#34d399}
+.z-string{color:#fbbf24}
+.z-number{color:#60a5fa}
+.z-comment{color:#64748b;font-style:italic}
+.z-export{color:#f472b6}
+.z-chain{color:#fb923c}
+
+/* STATUS BAR */
+.status-bar{background:var(--surf2);border-top:1px solid var(--br);padding:7px 24px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.stat{font-size:11px;color:var(--txt3)}
+.stat span{color:var(--txt2);font-weight:600}
+
+/* EMPTY + ERROR */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;opacity:.35;text-align:center;padding:40px}
+.empty-icon{font-size:32px}
+.empty-text{font-size:13px;color:var(--txt2);line-height:1.5}
+.err-box{background:#ef44440a;border:1px solid #ef444433;border-radius:8px;padding:14px 18px;color:var(--err);font-size:12px;margin:16px 20px;line-height:1.6}
+
+/* FIELD ANALYSIS TABLE */
+.analysis-table{width:100%;border-collapse:collapse;font-size:12px}
+.analysis-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);padding:0 0 10px;text-align:left;border-bottom:1px solid var(--br2)}
+.analysis-table td{padding:7px 0;border-bottom:1px solid var(--br);vertical-align:middle}
+.analysis-table tr:last-child td{border-bottom:none}
+.field-key-cell{font-family:inherit;color:var(--txt)}
+.type-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;background:var(--surf3);color:var(--acc2);white-space:nowrap}
+.pattern-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;background:#6366f115;border:1px solid #6366f133;color:var(--acc2);white-space:nowrap}
+.null-badge{font-size:10px;color:var(--txt3);font-style:italic}
+
+/* MULTI SAMPLE */
+.sample-card{background:var(--surf2);border:1px solid var(--br2);border-radius:8px;padding:12px 16px;margin-bottom:10px}
+.sample-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sample-card-title{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.6px}
+.sample-card-meta{font-size:11px;color:var(--txt3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;font-size:13px;padding:10px 22px;border-radius:8px;opacity:0;transition:all .2s;pointer-events:none;z-index:9999;font-weight:600}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FOOTER */
+.footer{background:var(--surf);border-top:1px solid var(--br2);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--txt3);flex-wrap:wrap;gap:8px}
+.footer a{color:var(--acc2);text-decoration:none}
+.footer a:hover{color:var(--acc)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--surf3)}
+
+@media(max-width:768px){.main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.panel-left{border-right:none;border-bottom:1px solid var(--br2)}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-badge">ZOD PRO</div>
+    <div>
+      <div class="logo-title">JSON to Zod Pro</div>
+      <div class="logo-sub">intelligent typescript schema generator</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="chip ok" id="schemaStatus">ready</div>
+    <div class="chip" id="fieldCount">0 fields</div>
+    <button class="btn success" onclick="copySchema()">⎘ copy schema</button>
+    <button class="btn primary" onclick="regenerate()">generate ↗</button>
+  </div>
+</div>
+
+<!-- SAMPLE PRESETS -->
+<div class="samples-bar">
+  <span class="samples-label">presets →</span>
+  <button class="sample-btn" onclick="loadSample('user')">user profile</button>
+  <button class="sample-btn" onclick="loadSample('api')">api response</button>
+  <button class="sample-btn" onclick="loadSample('ecommerce')">e-commerce</button>
+  <button class="sample-btn" onclick="loadSample('nullable')">nullable fields</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('recursive')">recursive ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('polymorphic')">disc. union ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('usersArray')">users array ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('reservedKeys')">reserved keys ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('mixedArray')">mixed array ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('deepNested')">deep nested ★</button>
+  <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('patterns')">all patterns ★</button>
+</div>
+
+<!-- OPTIONS -->
+<div class="options-bar">
+  <div class="opt-group">
+    <span class="opt-label">name:</span>
+    <input type="text" id="schemaName" value="MySchema" style="width:120px" oninput="debounce()">
+  </div>
+  <div class="opt-group">
+    <span class="opt-label">output:</span>
+    <select id="outputMode" onchange="regenerate()">
+      <option value="schema">zod schema</option>
+      <option value="type">z.infer type</option>
+      <option value="both" selected>schema + type</option>
+      <option value="validate">+ validate fns</option>
+    </select>
+  </div>
+  <div class="opt-group">
+    <span class="opt-label">naming:</span>
+    <select id="namingMode" onchange="regenerate()">
+      <option value="preserve">preserve</option>
+      <option value="camel">camelCase</option>
+      <option value="snake">snake_case</option>
+    </select>
+  </div>
+  <label class="toggle"><input type="checkbox" id="optOptional" checked onchange="regenerate()"> optional</label>
+  <label class="toggle"><input type="checkbox" id="optNullable" checked onchange="regenerate()"> nullable</label>
+  <label class="toggle"><input type="checkbox" id="optComments" checked onchange="regenerate()"> jsdoc</label>
+  <label class="toggle"><input type="checkbox" id="optStrict" onchange="regenerate()"> strict</label>
+  <label class="toggle"><input type="checkbox" id="optEnum" checked onchange="regenerate()"> enum detect</label>
+  <label class="toggle"><input type="checkbox" id="optPattern" checked onchange="regenerate()"> pattern detect</label>
+  <label class="toggle"><input type="checkbox" id="optImport" checked onchange="regenerate()"> import</label>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- LEFT: INPUT -->
+  <div class="panel panel-left">
+    <div class="panel-header">
+      <span class="panel-label">JSON Input</span>
+      <div class="panel-actions">
+        <span id="multiCount" style="font-size:11px;color:var(--acc2)"></span>
+        <button class="btn" onclick="addSample()">+ merge sample</button>
+        <button class="btn" onclick="formatInput()">format</button>
+        <button class="btn" onclick="clearInput()">clear</button>
+      </div>
+    </div>
+    <textarea id="jsonInput" 
+      placeholder='Paste your JSON here...
+
+{
+  "id": "usr_abc123",
+  "email": "alice@example.com",
+  "age": 28,
+  "role": "admin",
+  "verified": true,
+  "createdAt": "2024-03-10T09:15:00Z"
+}
+
+Tip: paste multiple JSONs sequentially 
+or use "+ merge sample" for smarter 
+optional field detection.' 
+      oninput="debounce()"></textarea>
+  </div>
+
+  <!-- RIGHT: OUTPUT -->
+  <div class="panel">
+    <div class="tab-bar">
+      <div class="tab active" id="tab-schema" onclick="switchTab('schema')">schema</div>
+      <div class="tab" id="tab-analysis" onclick="switchTab('analysis')">field analysis</div>
+      <div class="tab" id="tab-multi" onclick="switchTab('multi')">multi-sample <span id="sampleBadge"></span></div>
+    </div>
+
+    <div class="pane active" id="pane-schema">
+      <div id="outputArea">
+        <div class="empty-state">
+          <div class="empty-icon">⚡</div>
+          <div class="empty-text">paste JSON on the left<br>to generate your Zod schema</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-analysis">
+      <div id="analysisArea"></div>
+    </div>
+
+    <div class="pane" id="pane-multi">
+      <div id="multiArea">
+        <div class="empty-state" style="opacity:.3">
+          <div class="empty-icon">⊕</div>
+          <div class="empty-text">click "+ merge sample" to add more JSON objects<br>for smarter optional field detection</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="stat" id="s1">fields: <span>–</span></div>
+  <div class="stat" id="s2">depth: <span>–</span></div>
+  <div class="stat" id="s3">arrays: <span>–</span></div>
+  <div class="stat" id="s4">patterns: <span>–</span></div>
+  <div class="stat" id="s5">enums: <span>–</span></div>
+  <div class="stat" id="s6">samples: <span>1</span></div>
+  <div class="stat" id="s7" style="margin-left:auto">lines: <span>–</span></div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  JSON TO ZOD PRO — Engine v7.0
+//
+//  v4  Root array per-key type union; correct key quoting; null as union member
+//  v5  widenTypes() — int+float→number, email+string→string, same refinement kept
+//  v6  inferNullableBase() — null fields infer semantic base type (not z.null())
+//      DISC_PREFERRED bypass cardinality ratio for discriminatedUnion
+//      ENUM_HINT_KEYS — bounded string fields suggest z.enum
+//  v7  DFS path-based recursion — fixes false positive on repeated siblings
+//      z.enum([value]) for single-value ENUM_HINT_KEYS fields
+//      Token-based syntax highlighter (no double-processing artifacts)
+// ═══════════════════════════════════════════════════════════════
+
+// ─────────────── STATE ────────────────────────────────────────
+let extraSamples = [];
+let lastSchema   = '';
+let currentTab   = 'schema';
+let debTimer     = null;
+let lastParsed   = null;
+
+// ─────────────── PRESETS ──────────────────────────────────────
+const PRESETS = {
+user:`{
+  "id": "usr_abc123",
+  "email": "alice@example.com",
+  "username": "alice_dev",
+  "age": 28,
+  "role": "admin",
+  "verified": true,
+  "avatarUrl": "https://cdn.example.com/avatars/alice.jpg",
+  "bio": null,
+  "phone": null,
+  "createdAt": "2024-03-10T09:15:00Z",
+  "updatedAt": "2024-11-22T14:30:00Z",
+  "preferences": {
+    "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  }
+}`,
+recursive:`{
+  "id": "node_1",
+  "metadata": {
+    "depth": 1,
+    "tags": ["root", "test"]
+  },
+  "child": {
+    "id": "node_2",
+    "metadata": {
+      "depth": 2,
+      "tags": ["branch"]
+    },
+    "child": {
+      "id": "node_3",
+      "metadata": null,
+      "child": null
+    }
+  }
+}`,
+polymorphic:`{
+  "events": [
+    { "type": "click", "timestamp": 1712345678, "coords": [10, 20] },
+    { "type": "keypress", "timestamp": 1712345679, "key": "Enter" },
+    { "type": "click", "timestamp": 1712345680, "coords": [15, 25], "target": "button#submit" }
+  ]
+}`,
+usersArray:`[
+  { "username": "alice", "bio": "Hello", "avatar": "https://img.com/1" },
+  { "username": "bob", "bio": null },
+  { "username": "charlie" }
+]`,
+reservedKeys:`{
+  "default": true,
+  "import": "module",
+  "var": 0,
+  "2fa_enabled": false,
+  "user.profile-image": "https://cdn.link/img.png",
+  "parse": "collision_test",
+  "safeParse": "collision_test"
+}`,
+mixedArray:`{
+  "mixed_array": [
+    42,
+    "stringa",
+    { "type": "point", "coords": [1, 2] },
+    null,
+    [true, false]
+  ]
+}`,
+deepNested:`{
+  "level_1": {
+    "level_2": {
+      "level_3": {
+        "level_4": {},
+        "data": []
+      }
+    },
+    "empty_branch": {}
+  }
+}`,
+patterns:`{
+  "created_at": "2026-04-20T19:22:24Z",
+  "user_email": "dev@test.internal",
+  "website": "https://github.com/project",
+  "uuid": "550e8400-e29b-41d4-a716-446655440000"
+}`,
+api:`{
+  "success": true,
+  "status": 200,
+  "data": {
+    "items": [
+      {"id": 1, "title": "First Item", "active": true},
+      {"id": 2, "title": "Second Item", "active": false}
+    ],
+    "total": 2,
+    "page": 1,
+    "perPage": 20
+  },
+  "meta": {
+    "requestId": "req_xyz789",
+    "timestamp": "2024-12-01T00:00:00Z",
+    "version": "v2"
+  },
+  "errors": null
+}`,
+ecommerce:`{
+  "orderId": "ord_8f2k9",
+  "status": "shipped",
+  "customer": {
+    "id": "cus_1234",
+    "email": "buyer@shop.com",
+    "name": "John Doe"
+  },
+  "items": [
+    {
+      "sku": "PROD-001",
+      "name": "Wireless Headphones",
+      "quantity": 1,
+      "price": 89.99,
+      "discount": 0
+    }
+  ],
+  "total": 89.99,
+  "currency": "USD",
+  "paidAt": "2024-12-01T12:00:00Z"
+}`,
+nullable:`{
+  "userId": "u_001",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "middleName": null,
+  "phone": null,
+  "website": "https://janesmith.dev",
+  "deletedAt": null,
+  "lastLoginAt": "2024-11-30T08:00:00Z"
+}`
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  PATTERN DETECTION
+//
+//  UUID: relaxed variant byte — covers v1–v5 and non-RFC UUIDs from legacy systems.
+//  Email: TLD allows .internal, .local, and other non-standard intranet domains.
+//  JWT is tested before URL — both contain dots but JWTs have no slashes.
+//  Order matters: first matching pattern wins.
+// ═══════════════════════════════════════════════════════════════
+const RE_IPV4    = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)$/;
+const RE_UUID    = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const RE_DT      = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/;
+const RE_DATE    = /^\d{4}-\d{2}-\d{2}$/;
+const RE_SV      = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/;
+const RE_HEX     = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+const RE_CUID    = /^c[a-z0-9]{24,}$/;
+const RE_CUID2   = /^[a-z][a-z0-9]{23}$/;
+const RE_JWT     = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+const RE_EMAIL   = /^[^\s@"'<>()[\]\\,;:]+@[^\s@"'<>()[\]\\,;:]+\.[^\s@"'<>()[\]\\,;:.]{1,}$/;
+const RE_URL     = /^https?:\/\/[^\s<>"{}|\\^`[\]]+$/;
+
+const PATTERNS = [
+  { name:'uuid',      re: RE_UUID,  zod: 'z.string().uuid()' },
+  { name:'email',     re: RE_EMAIL, zod: 'z.string().email()' },
+  { name:'url',       re: RE_URL,   zod: 'z.string().url()' },
+  { name:'datetime',  re: RE_DT,    zod: 'z.string().datetime({ offset: true })' },
+  { name:'date',      re: RE_DATE,  zod: 'z.string().date()' },
+  { name:'ipv4',      re: RE_IPV4,  zod: 'z.string().ip({ version: "v4" })' },
+  { name:'semver',    re: RE_SV,    zod: 'z.string().regex(/^\\d+\\.\\d+\\.\\d+(-[\\w.-]+)?(\\+[\\w.-]+)?$/)' },
+  { name:'hex-color', re: RE_HEX,   zod: 'z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i)' },
+  { name:'cuid',      re: RE_CUID,  zod: 'z.string().cuid()' },
+  { name:'cuid2',     re: RE_CUID2, zod: 'z.string().cuid2()' },
+  { name:'jwt',       re: RE_JWT,   zod: 'z.string().jwt()' },
+];
+
+function detectPattern(key, value) {
+  if (typeof value !== 'string' || value.length < 4) return null;
+  // JWT must be checked before URL — both have dots but JWT has no slashes
+  if (!value.startsWith('http') && RE_JWT.test(value) && value.split('.').length === 3) {
+    return PATTERNS.find(p => p.name === 'jwt');
+  }
+  for (const p of PATTERNS) if (p.re.test(value)) return p;
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  KEY QUOTING
+//
+//  Object property keys need quoting only when they fail the JS
+//  identifier regex — i.e., they contain non-identifier characters
+//  (dots, hyphens, spaces) or start with a digit.
+//
+//  Reserved words (default, import, var, return …) and Zod method
+//  names (parse, safeParse …) are valid property names without quotes:
+//    { default: z.boolean() }    ← valid TS/JS
+//    { parse: z.string()   }    ← valid TS/JS
+//    { "2fa_enabled": z.boolean() }  ← must quote: starts with digit
+//    { "user.profile-image": z.string().url() } ← must quote: dot+hyphen
+// ═══════════════════════════════════════════════════════════════
+const JS_IDENTIFIER_RE = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+
+function needsQuoting(rawKey) {
+  // Only quote if the key is not a valid JS identifier.
+  // Reserved words are legal as property names — no special handling needed.
+  return !JS_IDENTIFIER_RE.test(rawKey);
+}
+
+function formatKey(rawKey) {
+  const named = toNaming(rawKey);
+  return needsQuoting(named) ? JSON.stringify(named) : named;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RECURSIVE SCHEMA DETECTION
+//
+//  A shape is self-referential only when its structural fingerprint
+//  appears in its own ancestor chain during DFS traversal.
+//
+//  This correctly distinguishes:
+//    - Repeated siblings  [{a,b},{a,b}]  → NOT recursive (same shape, different branches)
+//    - True self-reference {child:{child:null}} → recursive (ancestor found on stack)
+//
+//  The previous count-based approach incorrectly flagged identical
+//  sibling objects as recursive. The path-based DFS is also O(n)
+//  instead of O(n²) and requires no similarity threshold tuning.
+// ═══════════════════════════════════════════════════════════════
+
+/** Structural fingerprint: sorted key names joined by '|'. */
+function fingerprint(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
+  return Object.keys(obj).sort().join('|');
+}
+
+/**
+ * Jaccard overlap between two key-sets — still used by the
+ * discriminant and key-factoring helpers.
+ */
+function keyOverlap(keysA, keysB) {
+  const a = new Set(keysA), b = new Set(keysB);
+  const inter = [...a].filter(k => b.has(k)).length;
+  const union  = new Set([...a, ...b]).size;
+  return union === 0 ? 0 : inter / union;
+}
+
+/**
+ * DFS-based recursive fingerprint detector.
+ *
+ * Maintains an ancestor stack (Set of fingerprints of all objects
+ * currently open on the call stack). An object is recursive iff its
+ * fingerprint is already in that stack when it is first visited.
+ * Array items are treated as siblings — they extend the stack only
+ * while their own children are being processed, never marking each
+ * other as recursive.
+ */
+function findRecursiveFingerprints(root) {
+  const recursive = new Set();
+  const ancestors = new Set(); // fps of objects currently open on the DFS stack
+
+  function dfs(v) {
+    if (!v || typeof v !== 'object') return;
+    if (Array.isArray(v)) {
+      // Siblings: process each independently without contaminating the stack
+      v.forEach(dfs);
+      return;
+    }
+    const fp = fingerprint(v);
+    if (!fp) return;
+
+    if (ancestors.has(fp)) {
+      // The same shape is already open above us on the stack → true recursion
+      recursive.add(fp);
+      return; // stop: no need to recurse further into a known cycle
+    }
+
+    ancestors.add(fp);
+    Object.values(v).forEach(dfs);
+    ancestors.delete(fp); // backtrack: leaving this object's scope
+  }
+
+  dfs(root);
+  return recursive;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ENUM CARDINALITY GUARD
+// ═══════════════════════════════════════════════════════════════
+const ID_LIKE_KEYS = /^(id|uid|guid|uuid|username|email|name|firstName|lastName|fullName|slug|handle|bio|avatar|avatarUrl|imageUrl|picture|photo|thumbnail|preview|summary|excerpt|note|memo|title|label|description|message|content|body|text|href|src|url|uri|path|filename|key|ref|token|hash|code|serial|sku|isbn|ean|barcode|phone|address|ip|hostname)$/i;
+
+function isLikelyEnum(key, valuesArr) {
+  const all  = valuesArr.filter(v => typeof v === 'string');
+  const uniq = new Set(all);
+  if (uniq.size < 2 || uniq.size > 8) return false;
+  if (all.length > 0 && uniq.size / all.length > 0.6) return false;
+  if (key && ID_LIKE_KEYS.test(key)) return false;
+  if ([...uniq].some(v => v.length > 32 || /\s{2,}/.test(v))) return false;
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DISCRIMINANT DETECTION
+// ═══════════════════════════════════════════════════════════════
+const DISC_PREFERRED = ['type','kind','action','event','category','status','role','variant','format','method','op','operation','command'];
+const DISC_IDENTIFIER_KEYS = /^(id|uid|guid|uuid|username|email|name|firstName|lastName|fullName|slug|handle|bio|avatar|avatarUrl|imageUrl|picture|photo|thumbnail|preview|summary|excerpt|note|memo|title|label|description|message|content|body|text|href|src|url|uri|path|filename|key|ref|token|hash|code|serial|sku|isbn|ean|barcode|phone|address|ip|hostname)$/i;
+const DISC_MAX_UNIQUE      = 12;
+const DISC_CARDINALITY_RATIO = 0.75;
+const FACTOR_THRESHOLD       = 0.65;
+
+function findDiscriminant(items) {
+  const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
+  if (objs.length < 2) return null;
+  const candidateKeys = Object.keys(objs[0]).filter(k =>
+    objs.every(o => k in o && typeof o[k] === 'string')
+  );
+  function score(k) {
+    const i = DISC_PREFERRED.indexOf(k.toLowerCase());
+    return i >= 0 ? i : DISC_PREFERRED.length;
+  }
+  const valid = candidateKeys
+    .filter(k => {
+      if (DISC_IDENTIFIER_KEYS.test(k)) return false;
+      const vals = objs.map(o => o[k]);
+      const uniq = new Set(vals);
+      if (uniq.size < 2) return false;
+      if (uniq.size > DISC_MAX_UNIQUE) return false;
+      // Cardinality ratio guard: skip for DISC_PREFERRED keys.
+      // "type","kind","action" etc. naturally have 1 unique value per variant —
+      // a ratio of 1.0 is expected and correct for these semantic discriminants.
+      const isPreferred = DISC_PREFERRED.includes(k.toLowerCase());
+      if (!isPreferred && uniq.size / objs.length > DISC_CARDINALITY_RATIO) return false;
+      return true;
+    })
+    .sort((a, b) => score(a) - score(b));
+  return valid[0] ?? null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NAMING
+// ═══════════════════════════════════════════════════════════════
+function toNaming(key) {
+  const mode = document.getElementById('namingMode').value;
+  if (mode === 'preserve') return key;
+  const words = key
+    .replace(/[-_](.)/g, (_, c) => ' ' + c.toUpperCase())
+    .replace(/([A-Z])/g, ' $1')
+    .trim().split(/\s+/).filter(Boolean);
+  if (mode === 'camel') return words.map((w, i) => i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+  if (mode === 'snake') return words.map(w => w.toLowerCase()).join('_');
+  return key;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TYPE WIDENING
+//
+//  When multiple Zod types are collected across array items or
+//  multi-sample merging, apply the least-upper-bound (supertype):
+//
+//    z.number().int() + z.number()        → z.number()
+//    z.string().email() + z.string()      → z.string()
+//    z.string().email() + z.string().url() → z.string()
+//    z.string().email() × N (all same)    → z.string().email()  (kept)
+//    z.number().int() × N (all same)      → z.number().int()    (kept)
+//
+//  The function also deduplicates the set after widening.
+// ═══════════════════════════════════════════════════════════════
+function widenTypes(types) {
+  if (types.length === 0) return types;
+  const set = [...new Set(types)]; // deduplicate first
+
+    const hasNumber    = set.includes('z.number()');
+  const hasNumberInt = set.includes('z.number().int()');
+  if (hasNumber && hasNumberInt) {
+    // int + float seen together → widen to plain number
+    const without = set.filter(t => t !== 'z.number().int()');
+    return widenTypes(without); // recurse in case other types remain
+  }
+
+    // Partition: refined strings (z.string().X) vs plain z.string()
+  const isRefinedString = t => t.startsWith('z.string().') && t !== 'z.string()';
+  const refinedStrings  = set.filter(isRefinedString);
+  const hasPlainString  = set.includes('z.string()');
+
+  if (refinedStrings.length > 0) {
+    if (hasPlainString) {
+      // Refined + plain → keep only z.string()
+      const without = set.filter(t => !isRefinedString(t));
+      return widenTypes(without);
+    }
+    // Different refinements (email, url…) → widen to z.string()
+    const uniqueRefinements = [...new Set(refinedStrings)];
+    if (uniqueRefinements.length > 1) {
+      const withPlain = set.filter(t => !isRefinedString(t)).concat(['z.string()']);
+      return widenTypes([...new Set(withPlain)]);
+    }
+    // Identical refinements → keep the refinement
+  }
+
+  return set;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CORE TYPE RESOLVER
+//
+//  Dispatches a single (key, value) pair to the appropriate Zod
+//  type string. Always receives the raw value — never wrapped in an array.
+// ═══════════════════════════════════════════════════════════════
+function resolveZodType(key, value, opts, depth, ctx) {
+  if (value === null) return opts.nullable ? 'z.null()' : 'z.unknown()';
+  if (typeof value === 'boolean') return 'z.boolean()';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return 'z.number()';
+    return Number.isInteger(value) ? 'z.number().int()' : 'z.number()';
+  }
+  if (typeof value === 'string') {
+        if (opts.enum && key) {
+      const hints = ctx.enumHints[key] || [];
+      if (isLikelyEnum(key, hints)) {
+        // Multiple distinct values → promote to z.enum([...])
+        const vals = [...new Set(hints)];
+        ctx.enumCount++;
+        return `z.enum([${vals.map(v => JSON.stringify(v)).join(', ')}])`;
+      }
+      // Single observed value on a semantically bounded field
+      // → z.enum([value]) gives TypeScript the literal type; developer can extend.
+      if (ENUM_HINT_KEYS.test(key) && hints.length > 0) {
+        const val = JSON.stringify(hints[0]);
+        ctx.enumCount++;
+        return `z.enum([${val}])`;
+      }
+    }
+        if (opts.pattern) {
+      const pat = detectPattern(key, value);
+      if (pat) { ctx.patternCount++; return pat.zod; }
+    }
+    return 'z.string()';
+  }
+  if (Array.isArray(value)) {
+    ctx.arrayCount++;
+    return resolveArray(key, value, opts, depth, ctx);
+  }
+  if (typeof value === 'object') {
+    // Self-referential object: emit z.lazy() referencing the root schema
+    const fp = fingerprint(value);
+    if (fp && ctx.recursiveFps && ctx.recursiveFps.has(fp)) {
+      ctx.hasLazy = true;
+      if (!ctx.lazyRefs.has(fp)) ctx.lazyRefs.set(fp, ctx.lazyName);
+      return `z.lazy(() => ${ctx.lazyName}Schema)`;
+    }
+    return buildObject(value, opts, depth + 1, ctx);
+  }
+  return 'z.unknown()';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ARRAY RESOLVER
+//
+//  Decision tree:
+//    1. Tuple      — all items are sub-arrays of the same fixed length
+//    2. Primitives — homogeneous or mixed; null becomes z.null() union member
+//    3. Objects    — try discriminatedUnion → key factoring → plain union
+//    4. Mixed      — per-item type collection, deduplicate, widen, union
+// ═══════════════════════════════════════════════════════════════
+function resolveArray(key, items, opts, depth, ctx) {
+  if (!items.length) return 'z.array(z.unknown())';
+
+  // Tuple: all elements are sub-arrays of the same fixed length
+  const allSubArrays = items.every(Array.isArray);
+  if (allSubArrays) {
+    const lengths = [...new Set(items.map(a => a.length))];
+    if (lengths.length === 1 && lengths[0] > 0 && lengths[0] < 10) {
+      const tupleLen = lengths[0];
+      const tupleSchemas = [];
+      for (let i = 0; i < tupleLen; i++) {
+        const posVals = items.map(a => a[i]);
+        const types = [...new Set(posVals.map(v => resolveZodType(`${key}[${i}]`, v, opts, depth + 1, ctx)))];
+        tupleSchemas.push(types.length === 1 ? types[0] : `z.union([${types.join(', ')}])`);
+      }
+      return `z.tuple([${tupleSchemas.join(', ')}])`;
+    }
+  }
+
+  const allObjects    = items.every(v => v !== null && typeof v === 'object' && !Array.isArray(v));
+  const allPrimitives = items.every(v => typeof v !== 'object' || v === null);
+
+    if (allPrimitives) {
+    // null becomes a z.null() union member, not .nullable() on other types
+    const types = widenTypes([...new Set(items.map(v => resolveZodType(null, v, opts, depth + 1, ctx)))]);
+    if (types.length === 1) return `z.array(${types[0]})`;
+    return `z.array(z.union([${types.join(', ')}]))`;
+  }
+
+    if (allObjects && items.length >= 2) {
+    const disc = findDiscriminant(items);
+    if (disc) {
+      const groups = new Map();
+      for (const item of items) {
+        const tag = item[disc];
+        if (!groups.has(tag)) groups.set(tag, []);
+        groups.get(tag).push(item);
+      }
+      if (groups.size >= 2) {
+        const branches = [];
+        for (const [tag, group] of groups) {
+          const merged = mergedSample(group);
+          branches.push(buildObjectWithLiteral(merged, disc, tag, opts, depth + 1, ctx, group));
+        }
+        ctx.discUnionCount = (ctx.discUnionCount || 0) + 1;
+        return `z.array(\n  z.discriminatedUnion(${JSON.stringify(disc)}, [\n    ${branches.join(',\n    ')}\n  ])\n)`;
+      }
+    }
+    // Similar shapes but no clean discriminant → key factoring
+    if (avgOverlap(items) >= FACTOR_THRESHOLD) {
+      const { commonKeys, variantKeys, objs } = mergeObjectShapes(items);
+      return `z.array(${buildObjectFactored(objs[0], commonKeys, variantKeys, objs, opts, depth + 1, ctx)})`;
+    }
+    // Too different for factoring → plain z.union([...])
+    const shapes = deduplicateShapes(items);
+    if (shapes.length === 1) return `z.array(${buildObject(shapes[0], opts, depth + 1, ctx)})`;
+    return `z.array(z.union([${shapes.map(s => buildObject(s, opts, depth + 1, ctx)).join(', ')}]))`;
+  }
+
+  // ── Mixed array (objects + primitives + nested arrays + null) ───────────────
+  // Each element is resolved independently; null becomes a z.null() union member.
+  const rawTypes = items.map(v => resolveZodType(null, v, opts, depth + 1, ctx));
+  const types    = widenTypes([...new Set(rawTypes)]); // deduplicate + widen
+  if (types.length === 1) return `z.array(${types[0]})`;
+  return `z.array(z.union([${types.join(', ')}]))`;
+}
+
+// ─────────────── HELPERS ──────────────────────────────────────
+function mergedSample(objs) {
+  const merged = {};
+  for (const o of objs) {
+    for (const [k, v] of Object.entries(o)) {
+      if (!(k in merged) || merged[k] === null) merged[k] = v;
+    }
+  }
+  return merged;
+}
+
+function deduplicateShapes(items) {
+  const seen = new Set();
+  return items.filter(item => {
+    const fp = fingerprint(item) || JSON.stringify(item);
+    if (seen.has(fp)) return false;
+    seen.add(fp); return true;
+  });
+}
+
+function mergeObjectShapes(items) {
+  const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
+  const allKeys = new Set(objs.flatMap(o => Object.keys(o)));
+  const commonKeys  = [...allKeys].filter(k => objs.every(o => k in o));
+  const variantKeys = [...allKeys].filter(k => !objs.every(o => k in o));
+  return { commonKeys, variantKeys, objs };
+}
+
+function avgOverlap(items) {
+  const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
+  if (objs.length < 2) return 1;
+  let total = 0, count = 0;
+  for (let i = 0; i < objs.length; i++) {
+    for (let j = i + 1; j < objs.length; j++) {
+      total += keyOverlap(Object.keys(objs[i]), Object.keys(objs[j]));
+      count++;
+    }
+  }
+  return count > 0 ? total / count : 1;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  OBJECT BUILDERS
+//
+//  buildObjectFromItems — root arrays of objects; cross-item per-key union
+//  buildObject          — standard single-object context
+//  buildObjectWithLiteral — discriminatedUnion branch (z.literal discriminant)
+//  buildObjectFactored  — key-factored union (optional variant keys)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * FIX 1 — Per-key type union for root array items.
+ *
+ * When a root JSON is an array of objects, each key may have
+ * different types across items (e.g., id: 101 | "UUID-102" | 103).
+ * This function collects ALL values for each key across all items,
+ * then resolves to a union if types differ, and marks keys absent
+ * in some items as optional.
+ */
+function buildObjectFromItems(items, opts, depth, ctx) {
+  const indent = '  '.repeat(depth);
+  const inner  = '  '.repeat(depth + 1);
+
+    const allKeys = [...new Set(items.flatMap(o => Object.keys(o)))];
+  ctx.fieldCount += allKeys.length;
+
+  const lines = allKeys.map(rawKey => {
+    const key = formatKey(rawKey);
+
+        const observed  = items.map(o => o[rawKey]); // undefined if absent
+    const present   = observed.filter(v => v !== undefined);
+    const isAbsent  = observed.some(v => v === undefined);   // key missing in some items
+    const hasNull   = present.some(v => v === null);          // null in some items
+    const nonNull   = present.filter(v => v !== null);
+
+        let zodT;
+    if (nonNull.length === 0) {
+      // All observed values are null: infer base type from field name
+      zodT = opts.nullable
+        ? `${inferNullableBase(rawKey)}.nullable()`
+        : 'z.unknown()';
+    } else {
+            const rawTypes = nonNull.map(v => resolveZodType(rawKey, v, opts, depth, ctx));
+      const uniqTypes = widenTypes([...new Set(rawTypes)]); // Bug1+4: widen before union
+      zodT = uniqTypes.length === 1 ? uniqTypes[0] : `z.union([${uniqTypes.join(', ')}])`;
+            if (hasNull && opts.nullable && !zodT.includes('.nullable()')) {
+        zodT += '.nullable()';
+      }
+    }
+
+        if (isAbsent && opts.optional && !zodT.endsWith('.optional()')) {
+      zodT += '.optional()';
+    }
+
+    let out = '';
+    if (opts.comments) {
+      const sample = nonNull[0] ?? null;
+      const cmt = autoComment(rawKey, sample);
+      if (cmt) out += `${inner}/** ${cmt} */\n`;
+    }
+    out += `${inner}${key}: ${zodT},`;
+    return out;
+  });
+
+  const strict = opts.strict ? '.strict()' : '';
+  return `z.object({\n${lines.join('\n')}\n${indent}})${strict}`;
+}
+
+/**
+ * Standard object builder for single-object contexts.
+ * FIX 5: passes raw val (not [val]) to resolveZodType.
+ * FIX 2: formatKey() quotes reserved/non-identifier keys.
+ * FIX 3: empty objects → z.object({}) on one line.
+ */
+function buildObject(obj, opts, depth, ctx) {
+  const indent = '  '.repeat(depth);
+  const inner  = '  '.repeat(depth + 1);
+  const keys   = Object.keys(obj);
+  ctx.fieldCount += keys.length;
+  ctx.depthMax = Math.max(ctx.depthMax, depth);
+
+  // Empty object: z.object({}) is idiomatic; .strict() when strict mode is on.
+  if (!keys.length) {
+    const strictSuffix  = opts.strict ? '.strict()' : '';
+    const emptyComment  = opts.comments ? ' // empty in sample — refine if needed' : '';
+    return `z.object({})${strictSuffix}`;
+  }
+
+  const lines = keys.map(rawKey => {
+    const key     = formatKey(rawKey);        // FIX 2
+    const val     = obj[rawKey];              // FIX 5: raw value, NOT [val]
+    let zodT      = resolveZodType(rawKey, val, opts, depth, ctx);  // FIX 5
+
+    const isOpt   = opts.optional && ctx.optMap && ctx.optMap[rawKey];
+    const isNullV = val === null;
+
+    if (isNullV && opts.nullable) {
+      // Infer base type from field name; z.null() alone only accepts literal null.
+      const base = inferNullableBase(rawKey);
+      zodT = isOpt ? `${base}.nullable().optional()` : `${base}.nullable()`;
+    } else if (isOpt) {
+      zodT += '.optional()';
+    }
+
+    let out = '';
+    if (opts.comments) {
+      const cmt = autoComment(rawKey, val);
+      if (cmt) out += `${inner}/** ${cmt} */\n`;
+    }
+    out += `${inner}${key}: ${zodT},`;
+    return out;
+  });
+
+  const strict = opts.strict ? '.strict()' : '';
+  return `z.object({\n${lines.join('\n')}\n${indent}})${strict}`;
+}
+
+/** Build a discriminatedUnion branch with per-branch optional detection. */
+function buildObjectWithLiteral(merged, discKey, discVal, opts, depth, ctx, group) {
+  const indent = '  '.repeat(depth);
+  const inner  = '  '.repeat(depth + 1);
+
+  // Per-branch optionality: keys absent in some group members → .optional()
+  const groupOptKeys = new Set();
+  if (group && group.length > 1) {
+    const allBranchKeys = new Set(group.flatMap(o => Object.keys(o)));
+    for (const k of allBranchKeys) {
+      if (group.some(o => !(k in o))) groupOptKeys.add(k);
+    }
+  }
+
+  const keys = Object.keys(merged);
+  ctx.fieldCount += keys.length;
+
+  const lines = keys.map(rawKey => {
+    const key = formatKey(rawKey);
+    let zodT;
+    if (rawKey === discKey) {
+      zodT = `z.literal(${JSON.stringify(discVal)})`;
+    } else {
+      const val     = merged[rawKey];
+      const isNullV = val === null;
+      zodT = resolveZodType(rawKey, val, opts, depth, ctx);
+      const isBranchOpt = groupOptKeys.has(rawKey);
+      const isGlobalOpt = opts.optional && ctx.optMap && ctx.optMap[rawKey];
+      if (isNullV && opts.nullable && (isBranchOpt || isGlobalOpt)) zodT = 'z.null().optional()';
+      else if (isNullV && opts.nullable)   zodT = 'z.null()';
+      else if (isBranchOpt || isGlobalOpt) zodT += '.optional()';
+    }
+    let out = '';
+    if (opts.comments) {
+      const isBranchOpt = groupOptKeys.has(rawKey);
+      const baseCmt = autoComment(rawKey, merged[rawKey]);
+      const cmt = isBranchOpt ? (baseCmt ? baseCmt + ' — present in some events' : 'present in some events') : baseCmt;
+      if (cmt) out += `${inner}/** ${cmt} */\n`;
+    }
+    out += `${inner}${key}: ${zodT},`;
+    return out;
+  });
+
+  const strict = opts.strict ? '.strict()' : '';
+  return `z.object({\n${lines.join('\n')}\n${indent}})${strict}`;
+}
+
+/** Build factored object for similar-shape arrays (no clean discriminant). */
+function buildObjectFactored(rep, commonKeys, variantKeys, allObjs, opts, depth, ctx) {
+  const indent  = '  '.repeat(depth);
+  const inner   = '  '.repeat(depth + 1);
+  const allKeys = [...new Set([...commonKeys, ...variantKeys])];
+  ctx.fieldCount += allKeys.length;
+
+  const lines = allKeys.map(rawKey => {
+    const key    = formatKey(rawKey);
+    const isVar  = variantKeys.includes(rawKey);
+
+    const observed  = allObjs.map(o => o[rawKey]).filter(v => v !== undefined);
+    const nonNull   = observed.filter(v => v !== null);
+    const someNull  = observed.some(v => v === null);
+    const allNull   = observed.length > 0 && observed.every(v => v === null);
+
+    const bestVal = nonNull[0] ?? rep[rawKey] ?? null;
+    let zodT;
+
+    if (allNull) {
+      // All observed values were null: infer base type from field name.
+      // Never emit z.null() alone — it's useless for real data.
+      zodT = opts.nullable
+        ? `${inferNullableBase(rawKey)}.nullable()`
+        : 'z.unknown()';
+    } else {
+      zodT = resolveZodType(rawKey, bestVal, opts, depth, ctx);
+      if (someNull && opts.nullable && !zodT.includes('.nullable()') && !zodT.includes('z.null()')) zodT += '.nullable()';
+    }
+
+    const isGlobalOpt = opts.optional && ctx.optMap && ctx.optMap[rawKey];
+    if ((isVar || isGlobalOpt) && opts.optional && !zodT.endsWith('.optional()')) zodT += '.optional()';
+
+    let out = '';
+    if (opts.comments) {
+      const cmt = allNull
+        ? `${rawKey} — always null in sample; refine type if known`
+        : isVar ? (autoComment(rawKey, bestVal) ?? 'present in some items') : autoComment(rawKey, bestVal);
+      if (cmt) out += `${inner}/** ${cmt} */\n`;
+    }
+    out += `${inner}${key}: ${zodT},`;
+    return out;
+  });
+
+  const strict = opts.strict ? '.strict()' : '';
+  return `z.object({\n${lines.join('\n')}\n${indent}})${strict}`;
+}
+
+// ─────────────── NULL TYPE INFERENCE ─────────────────────────
+/**
+ * When a field is null in the sample, we can't know the true type.
+ * Instead of z.null() (which only accepts null), we infer a sensible
+ * base type from the field name, then wrap it with .nullable().
+ *
+ * This ensures the schema remains useful for future non-null data.
+ * The caller always appends .nullable() (and .optional() if needed).
+ */
+function inferNullableBase(key) {
+  const k = key.toLowerCase();
+  // Timestamp fields
+  if (/(?:_at|at|time|date|timestamp|created|updated|deleted|modified|expir|issued|published)$/.test(k) ||
+      /^(?:created|updated|deleted|modified|started|ended|issued|published)/.test(k)) {
+    return 'z.string().datetime({ offset: true })';
+  }
+  // URL/URI fields
+  if (/(url|uri|href|link|src|avatar|image|photo|picture|thumbnail|website|homepage)$/.test(k) ||
+      /^(?:url|uri|href|link|src)/.test(k)) {
+    return 'z.string().url()';
+  }
+  // Email fields
+  if (/(email|mail)$/.test(k) || /^(?:email|mail)/.test(k)) {
+    return 'z.string().email()';
+  }
+  // ID / UUID fields
+  if (/(uuid|guid)$/.test(k)) return 'z.string().uuid()';
+  if (/^.+id$/.test(k) && k !== 'id') return 'z.string()'; // typed ID
+  // Numeric fields
+  if (/(count|qty|quantity|amount|price|cost|fee|salary|score|rating|rank|weight|height|width|size|length|duration|timeout|limit|offset|page|total)$/.test(k)) {
+    return 'z.number()';
+  }
+  // Boolean fields
+  if (/^(?:is|has|can|should|will|did|was|use|show|hide|allow|enable|disable)/.test(k) ||
+      /(enabled|active|visible|deleted|archived|verified|confirmed|approved|published|locked|muted)$/.test(k)) {
+    return 'z.boolean()';
+  }
+  // Semantic string fields (bio, name, description, etc.)
+  if (/(bio|description|summary|excerpt|body|content|text|note|memo|comment|message|title|label|name|slug|tag|category)$/.test(k)) {
+    return 'z.string()';
+  }
+  // Default: unknown base (developer must refine)
+  return 'z.string()';
+}
+
+// ─────────────── AUTO COMMENTS ────────────────────────────────
+// ENUM_HINT_KEYS: single-sample string fields with these names get
+// a hint comment suggesting z.enum() if values turn out to be bounded.
+const ENUM_HINT_KEYS = /^(status|state|role|type|kind|action|event|category|variant|format|method|env|mode|tier|plan|level|priority|visibility|scope|phase|stage)$/i;
+
+function autoComment(key, value) {
+  const k = key.toLowerCase();
+  if (value === null) return `${key} — inferred nullable; update base type if known`;
+  if (k === 'id' || /^.+id$/.test(k)) return 'unique identifier';
+  if (k.includes('email')) return 'valid email address';
+  if (k.includes('url') || k.includes('uri') || k.includes('href') || k.includes('link')) return 'fully qualified URL';
+  if (k.endsWith('at') && typeof value === 'string') return 'ISO 8601 timestamp';
+  if (k === 'version') return 'semantic version string';
+  if (k.includes('password') || k.includes('secret') || k.includes('token') || k.includes('apikey')) return 'sensitive — handle with care';
+  // Semantically bounded key (status/role/type…): emit hint even for single value
+  if (ENUM_HINT_KEYS.test(k) && typeof value === 'string') return 'enum value — add more samples to auto-detect z.enum([...])';
+  if (k.startsWith('is') || k.startsWith('has') || k.startsWith('can') || k.startsWith('should')) return 'boolean flag';
+  return null;
+}
+
+// ─────────────── OPTIONAL / ENUM DETECTION ────────────────────
+function detectOptionals(objects) {
+  if (objects.length < 2) return {};
+  const keyCount = {};
+  for (const o of objects) {
+    if (typeof o !== 'object' || !o || Array.isArray(o)) continue;
+    for (const k of Object.keys(o)) keyCount[k] = (keyCount[k] || 0) + 1;
+  }
+  const map = {};
+  for (const [k, cnt] of Object.entries(keyCount)) if (cnt < objects.length) map[k] = true;
+  return map;
+}
+
+function collectEnums(objects) {
+  const hints = {};
+  function collect(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return;
+    for (const [k, v] of Object.entries(obj)) {
+      if (typeof v === 'string') { if (!hints[k]) hints[k] = []; hints[k].push(v); }
+      else if (Array.isArray(v)) v.forEach(collect);
+      else if (typeof v === 'object') collect(v);
+    }
+  }
+  objects.forEach(collect);
+  return hints;
+}
+
+function getDepth(v, d = 0) {
+  if (!v || typeof v !== 'object') return d;
+  if (Array.isArray(v)) return Math.max(d, ...v.map(x => getDepth(x, d + 1)));
+  const vals = Object.values(v);
+  if (!vals.length) return d;
+  return Math.max(d, ...vals.map(x => getDepth(x, d + 1)));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RECURSIVE INTERFACE GENERATOR
+// ═══════════════════════════════════════════════════════════════
+function generateTsInterface(obj, typeName, depth, recursiveFps) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return '';
+  const indent = '  '.repeat(depth);
+  return Object.entries(obj).map(([k, v]) => {
+    if (v === null) return `${indent}${k}?: ${typeName} | null;`;
+    if (typeof v === 'object' && !Array.isArray(v)) {
+      const fp = fingerprint(v);
+      if (fp && recursiveFps && recursiveFps.has(fp)) return `${indent}${k}?: ${typeName} | null;`;
+      const inner = generateTsInterface(v, typeName, depth + 1, recursiveFps);
+      return `${indent}${k}: {\n${inner}${indent}};`;
+    }
+    return `${indent}${k}: ${jsValToTs(v, typeName, recursiveFps)};`;
+  }).join('\n') + '\n';
+}
+
+function jsValToTs(v, selfName, recursiveFps) {
+  if (v === null) return 'null';
+  if (typeof v === 'boolean') return 'boolean';
+  if (typeof v === 'number') return 'number';
+  if (typeof v === 'string') return 'string';
+  if (Array.isArray(v)) {
+    if (!v.length) return 'unknown[]';
+    const types = [...new Set(v.map(x => jsValToTs(x, selfName, recursiveFps)))];
+    return types.length === 1 ? `${types[0]}[]` : `(${types.join(' | ')})[]`;
+  }
+  if (typeof v === 'object') {
+    const fp = fingerprint(v);
+    if (fp && recursiveFps && recursiveFps.has(fp)) return selfName;
+    return 'object';
+  }
+  return 'unknown';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MAIN GENERATOR
+// ═══════════════════════════════════════════════════════════════
+function generateSchema() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  if (!raw) return null;
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e) { return { error: e.message }; }
+  if (typeof parsed !== 'object' || parsed === null) return { error: 'root must be a JSON object or array' };
+  lastParsed = parsed;
+
+  const name = document.getElementById('schemaName').value.trim() || 'MySchema';
+  const mode = document.getElementById('outputMode').value;
+  const opts = {
+    optional: document.getElementById('optOptional').checked,
+    nullable: document.getElementById('optNullable').checked,
+    comments: document.getElementById('optComments').checked,
+    strict:   document.getElementById('optStrict').checked,
+    enum:     document.getElementById('optEnum').checked,
+    pattern:  document.getElementById('optPattern').checked,
+    import:   document.getElementById('optImport').checked,
+  };
+
+  const isRootArray = Array.isArray(parsed);
+  const notArr      = isRootArray ? [] : [parsed, ...extraSamples];
+  const recursiveFps = findRecursiveFingerprints(parsed);
+
+  const ctx = {
+    enumHints:     collectEnums(notArr),
+    optMap:        detectOptionals(notArr),
+    recursiveFps,
+    lazyName:      name,
+    lazyRefs:      new Map(),
+    hasLazy:       false,
+    fieldCount:    0,
+    depthMax:      0,
+    arrayCount:    0,
+    patternCount:  0,
+    enumCount:     0,
+    discUnionCount:0,
+  };
+
+  let root;
+  if (isRootArray) {
+    // Root array of objects: use per-key cross-item type union
+    const allAreObjects = parsed.every(v => v && typeof v === 'object' && !Array.isArray(v));
+    if (allAreObjects && parsed.length >= 2) {
+      // buildObjectFromItems collects all values per key and widens before union
+      root = `z.array(${buildObjectFromItems(parsed, opts, 0, ctx)})`;
+    } else {
+      root = resolveArray(null, parsed, opts, 0, ctx);
+    }
+  } else {
+    root = buildObject(parsed, opts, 0, ctx);
+  }
+
+  const PName = name.charAt(0).toUpperCase() + name.slice(1);
+  let out = '';
+  if (opts.import) out += `import { z } from "zod";\n\n`;
+
+  if (ctx.hasLazy) {
+    out += `// Recursive schema — z.lazy() required for self-referential types\n`;
+    out += `interface ${PName} {\n`;
+    out += generateTsInterface(parsed, PName, 1, recursiveFps);
+    out += `}\n\n`;
+    out += `export const ${name}Schema: z.ZodType<${PName}> = ${root};\n`;
+  } else {
+    if (mode === 'schema' || mode === 'both' || mode === 'validate') {
+      out += `export const ${name}Schema = ${root};\n`;
+    }
+  }
+
+  if (!ctx.hasLazy && (mode === 'type' || mode === 'both' || mode === 'validate')) {
+    out += `\nexport type ${PName} = z.infer<typeof ${name}Schema>;\n`;
+  }
+  if (mode === 'validate') {
+    out += `\n/** Parse and throw on invalid data */\nexport function parse${PName}(data: unknown): ${PName} {\n  return ${name}Schema.parse(data);\n}\n`;
+    out += `\n/** Safe parse — returns { success, data?, error? } */\nexport function safeParse${PName}(data: unknown) {\n  return ${name}Schema.safeParse(data);\n}\n`;
+  }
+
+  const depth = getDepth(parsed);
+  document.getElementById('s1').innerHTML = `fields: <span>${ctx.fieldCount}</span>`;
+  document.getElementById('s2').innerHTML = `depth: <span>${depth}</span>`;
+  document.getElementById('s3').innerHTML = `arrays: <span>${ctx.arrayCount}</span>`;
+  document.getElementById('s4').innerHTML = `patterns: <span>${ctx.patternCount}</span>`;
+  document.getElementById('s5').innerHTML = `enums: <span>${ctx.enumCount}</span>`;
+  document.getElementById('s6').innerHTML = `samples: <span>${1 + extraSamples.length}</span>`;
+  document.getElementById('s7').innerHTML = `lines: <span>${out.split('\n').length}</span>`;
+  document.getElementById('fieldCount').textContent = ctx.fieldCount + ' fields';
+
+  return { code: out, parsed, ctx };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SYNTAX HIGHLIGHTER
+// ═══════════════════════════════════════════════════════════════
+function highlight(code) {
+  code = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const tokens = [];
+  const mask = (val, cls) => {
+    const id = tokens.length;
+    tokens.push(`<span class="${cls}">${val}</span>`);
+    return `\x00${id}\x00`;
+  };
+  // 1. Protect comments (must come first — comments may contain keywords)
+  code = code.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, m => mask(m, 'z-comment'));
+  // 2. Protect string literals (before keyword scan to avoid false matches)
+  code = code.replace(/"([^"\n]*)"/g, m => mask(m, 'z-string'));
+  // 3. Language keywords
+  code = code.replace(/\b(export|const|type|import|from|function|return|interface|extends)\b/g,
+    m => mask(m, 'z-export'));
+  // 4. z. prefix
+  code = code.replace(/\bz\b(?=\.)/g, m => mask(m, 'z-keyword'));
+  // 5. Zod method names (after the dot)
+  code = code.replace(/\.(object|string|number|boolean|array|null|union|enum|unknown|literal|any|record|infer|tuple|discriminatedUnion|intersection|optional|nullable|parse|safeParse|strict|min|max|email|url|uuid|datetime|date|ip|cuid|cuid2|jwt|regex|int|positive|nonnegative|finite|lazy|ZodType)\b/g,
+    (m, p1) => `.${mask(p1, 'z-method')}`);
+  // 6. Object keys (indented identifier followed by colon)
+  code = code.replace(/^(\s+)([a-zA-Z_$][a-zA-Z0-9_$]*)(\s*:)/gm,
+    (m, p1, p2, p3) => `${p1}${mask(p2, 'z-chain')}${p3}`);
+  // 7. Restore all tokens
+  return code.replace(/\x00(\d+)\x00/g, (_, id) => tokens[parseInt(id)]);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════
+function regenerate() {
+  const result = generateSchema();
+  const area   = document.getElementById('outputArea');
+  const stat   = document.getElementById('schemaStatus');
+  if (!result) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-text">paste JSON on the left<br>to generate your Zod schema</div></div>`;
+    stat.textContent = 'ready'; stat.className = 'chip ok'; return;
+  }
+  if (result.error) {
+    area.innerHTML = `<div class="err-box">⚠ JSON Error: ${result.error}</div>`;
+    stat.textContent = 'invalid JSON'; stat.className = 'chip err'; return;
+  }
+  lastSchema = result.code;
+  stat.textContent = 'valid ✓'; stat.className = 'chip ok';
+  area.innerHTML = `<div class="output-code">${highlight(result.code)}</div>`;
+  if (currentTab === 'analysis') renderAnalysis(result.parsed, result.ctx);
+}
+
+// ─────────────── FIELD ANALYSIS ───────────────────────────────
+function renderAnalysis(parsed, ctx) {
+  const area = document.getElementById('analysisArea');
+  if (!parsed || typeof parsed !== 'object') { area.innerHTML = '<div style="color:var(--txt3);font-size:12px;padding:10px">nothing to analyze</div>'; return; }
+  const opts = { pattern: document.getElementById('optPattern').checked };
+  const rows = []; const seenKeys = new Set();
+  function walk(obj, prefix) {
+    if (typeof obj !== 'object' || obj === null) return;
+    if (Array.isArray(obj)) { obj.slice(0, 5).forEach(v => walk(v, prefix)); return; }
+    for (const [k, v] of Object.entries(obj)) {
+      const fk = prefix ? `${prefix}.${k}` : k;
+      if (seenKeys.has(fk)) continue; seenKeys.add(fk);
+      const t   = v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v;
+      const pat = opts.pattern && typeof v === 'string' ? detectPattern(k, v) : null;
+      const isRec = typeof v === 'object' && v !== null && !Array.isArray(v) && ctx && ctx.recursiveFps && ctx.recursiveFps.has(fingerprint(v));
+      rows.push({ key: fk, type: t, pat: pat?.name, nullable: v === null, isObj: typeof v === 'object' && v !== null && !Array.isArray(v), isRec });
+      if (typeof v === 'object' && v !== null && !Array.isArray(v)) walk(v, fk);
+    }
+  }
+  walk(Array.isArray(parsed) ? (parsed[0] || {}) : parsed, '');
+  if (!rows.length) { area.innerHTML = '<div style="color:var(--txt3);font-size:12px;padding:10px">empty object</div>'; return; }
+  area.innerHTML = `<table class="analysis-table">
+    <thead><tr><th style="width:42%">field</th><th>type</th><th>inference</th><th>flags</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td class="field-key-cell" style="${r.isObj ? 'color:var(--txt2)' : ''}">${r.key}</td>
+      <td><span class="type-badge">${r.type}</span></td>
+      <td>${r.pat ? `<span class="pattern-badge">${r.pat}</span>` : ''}${r.isRec ? `<span class="pattern-badge" style="background:#f59e0b15;border-color:#f59e0b55;color:#f59e0b">recursive</span>` : ''}</td>
+      <td>${r.nullable ? `<span class="null-badge">nullable</span>` : ''}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ─────────────── MULTI SAMPLE PANE ────────────────────────────
+function renderMultiPane() {
+  const area  = document.getElementById('multiArea');
+  const badge = document.getElementById('sampleBadge');
+  badge.textContent = extraSamples.length > 0 ? `(${extraSamples.length})` : '';
+  if (!extraSamples.length) {
+    area.innerHTML = `<div class="empty-state" style="opacity:.3"><div class="empty-icon">⊕</div><div class="empty-text">click "+ merge sample" to add more JSON objects<br>for smarter optional field detection</div></div>`;
+    return;
+  }
+  area.innerHTML = `<p style="font-size:12px;color:var(--txt2);margin-bottom:14px">${extraSamples.length} extra sample(s) merged for optional field detection.</p>
+    ${extraSamples.map((s, i) => {
+      const keys = typeof s === 'object' && s ? Object.keys(s) : [];
+      return `<div class="sample-card"><div class="sample-card-header"><span class="sample-card-title">sample ${i + 2}</span><button class="btn" onclick="removeSample(${i})" style="font-size:10px;padding:2px 8px">remove</button></div><div class="sample-card-meta">{${keys.slice(0, 5).join(', ')}${keys.length > 5 ? ', …' : ''}} — ${keys.length} top-level keys</div></div>`;
+    }).join('')}`;
+}
+
+// ─────────────── ACTIONS ──────────────────────────────────────
+function loadSample(key) {
+  document.getElementById('jsonInput').value = PRESETS[key];
+  extraSamples = [];
+  document.getElementById('multiCount').textContent = '';
+  regenerate();
+  if (currentTab === 'multi') renderMultiPane();
+}
+
+function addSample() {
+  const val = prompt('Paste an additional JSON sample to merge with the main one:');
+  if (!val || !val.trim()) return;
+  try {
+    const p = JSON.parse(val.trim());
+    extraSamples.push(p);
+    document.getElementById('multiCount').textContent = `+${extraSamples.length} merged`;
+    regenerate();
+    if (currentTab === 'multi') renderMultiPane();
+  } catch(e) { alert('Invalid JSON:\n' + e.message); }
+}
+
+function removeSample(i) {
+  extraSamples.splice(i, 1);
+  document.getElementById('multiCount').textContent = extraSamples.length ? `+${extraSamples.length} merged` : '';
+  renderMultiPane(); regenerate();
+}
+
+function formatInput() {
+  const ta = document.getElementById('jsonInput');
+  try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); regenerate(); }
+  catch(e) { alert('Cannot format: invalid JSON\n' + e.message); }
+}
+
+function clearInput() {
+  document.getElementById('jsonInput').value = '';
+  extraSamples = []; lastSchema = ''; lastParsed = null;
+  document.getElementById('multiCount').textContent = '';
+  document.getElementById('outputArea').innerHTML = `<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-text">paste JSON on the left<br>to generate your Zod schema</div></div>`;
+  document.getElementById('schemaStatus').textContent = 'ready';
+  document.getElementById('schemaStatus').className = 'chip ok';
+  ['s1','s2','s3','s4','s5'].forEach(id => document.getElementById(id).querySelector('span').textContent = '–');
+}
+
+function copySchema() {
+  if (!lastSchema) { alert('Generate a schema first!'); return; }
+  navigator.clipboard.writeText(lastSchema).then(showToast).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = lastSchema; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast();
+  });
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+  if (tab === 'analysis' && lastParsed) { const r = generateSchema(); if (r && r.parsed) renderAnalysis(r.parsed, r.ctx); }
+  if (tab === 'multi') renderMultiPane();
+}
+
+function debounce() {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(regenerate, 380);
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadSample('user'); });
+</script>
+
+</body>
+</html>
