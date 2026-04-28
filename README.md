@@ -21,6 +21,8 @@ Most JSON→Zod converters do a naive type-mapping pass. This tool does signific
 | Type widening (int+float → number) | ✗ | ✓ |
 | Null field semantic inference | ✗ | ✓ |
 | Enum auto-detection | ✗ | ✓ |
+| BigInt detection | ✗ | ✓ |
+| Coerce numeric strings | ✗ | ✓ |
 | Key quoting for non-identifier keys | ✗ | ✓ |
 | Tuple detection | ✗ | ✓ |
 
@@ -61,11 +63,54 @@ The engine recognises 11 string formats and maps them to the appropriate Zod val
 | CUID2 | `tz4a98xxat96iws9...` | `z.string().cuid2()` |
 | JWT | `eyJ...` | `z.string().jwt()` |
 
+Datetime inference also activates for non-ISO date strings when the **field name** is date-like (`registeredAt`, `lastLogin`, `createdDate`, etc.) **and** the value successfully parses as a date — a double-gate that prevents false positives on free-text fields.
+
+### BigInt inference
+JSON numbers at or above `Number.MAX_SAFE_INTEGER` (9007199254740991) have already lost precision during `JSON.parse`. These fields emit `z.coerce.bigint()`. Digit-only strings above the same threshold (without leading zeros) are also promoted to `z.coerce.bigint()`. Semantic key names such as `snowflake`, `discordId`, `telegramId`, `int64`, and `uint64` lower the threshold to 10+ digits.
+
+Strings with leading zeros (`"0001234567890"`) are always treated as codes or identifiers and remain `z.string()`.
+
 ### Enum auto-detection
 With multiple JSON samples, string fields with low cardinality (≤8 unique values, ratio ≤0.6) are automatically promoted to `z.enum([...])`. Semantic fields (`status`, `role`, `type`, `kind`…) get `z.enum(["value"])` even from a single sample.
 
 ### Discriminated unions
-Arrays of objects sharing a string discriminant key (`type`, `kind`, `action`…) are automatically modelled as `z.discriminatedUnion()` — faster validation and better error messages than plain `z.union()`. Per-branch optional fields are detected and correctly marked `.optional()`.
+Arrays of objects sharing a string discriminant key (`type`, `kind`, `action`…) are automatically modelled as `z.discriminatedUnion()`:
+
+```ts
+// Input
+[
+  { "type": "success", "data": "ok" },
+  { "type": "error", "error_code": 500 }
+]
+
+// Output
+z.discriminatedUnion("type", [
+  z.object({ type: z.literal("success"), data: z.string() }),
+  z.object({ type: z.literal("error"), error_code: z.number().int() }),
+])
+```
+
+Key rules:
+- Branches with **structurally different keys** → `z.discriminatedUnion()`. Each branch's fields are required unless absent from multiple samples of *that branch specifically*.
+- Branches with **identical key sets** (only the discriminant value differs) → single object with `z.enum([...])`. Emitting N identical branches would be redundant.
+- Empty-string discriminant values disqualify the key from being a discriminant.
+
+### Common Minimum Type (CMT) for object arrays
+When a field appears in some items but not others, or is `null` in some, the engine merges all observations before emitting the schema:
+
+```ts
+// Input: 13 person records where "friends" is [] in 2 and [{...}] in 11
+friends: z.array(z.object({
+  id: z.number().int(),
+  name: z.string(),
+  alias: z.enum(["Ace", "Alpha", "Shadow"]),
+}))
+
+// NOT:
+friends: z.union([z.array(z.unknown()), z.array(z.object({...})), ...])
+```
+
+Empty arrays carry no type information and never suppress the type inferred from populated siblings.
 
 ### Multi-sample merging
 Click **+ merge sample** to provide additional JSON objects. The engine cross-references all samples to:
@@ -85,16 +130,38 @@ isActive: null  → z.boolean().nullable()
 ```
 
 ### Recursive schemas
-Genuinely self-referential structures (tree nodes, linked lists) are detected via a DFS ancestor-stack algorithm and emitted with `z.lazy()` + a companion TypeScript interface. Repeated sibling objects (e.g., an array of items with the same shape) are correctly **not** flagged as recursive.
+Genuinely self-referential structures (tree nodes, linked lists, nested menus) are detected and emitted with `z.lazy()` plus a companion TypeScript interface — required because `z.infer<>` cannot resolve circular types.
+
+Two detection modes:
+- **Ancestor-chain** — an object whose key-set matches an open ancestor in the current DFS path (exact or ≥ 80% Jaccard overlap).
+- **Array-item** — an array field whose items have ≥ 80% key-overlap with the object that contains the array. Detects `children: [{children: [], name: "..."}]` without needing to reach a leaf.
+
+```ts
+// Input
+{ "name": "Root", "children": [{ "name": "Child", "children": [] }] }
+
+// Output
+interface MySchema {
+  name: string;
+  children: MySchema[];
+}
+
+export const mySchemaSchema: z.ZodType<MySchema> = z.object({
+  name: z.string(),
+  children: z.array(z.lazy(() => mySchemaSchema)),
+});
+```
+
+Sibling objects — items in the same array — are never flagged as recursive. Detection is capped at depth 20 and memoizes visited shapes to prevent stack overflows on pathological inputs.
 
 ### Type widening
 When collecting types across multiple values, the engine applies the least-upper-bound before forming a union:
 
 ```
-z.number().int() + z.number()      → z.number()
-z.string().email() + z.string()    → z.string()
+z.number().int() + z.number()         → z.number()
+z.string().email() + z.string()       → z.string()
 z.string().email() + z.string().url() → z.string()
-z.string().email() × N             → z.string().email()   (same refinement kept)
+z.string().email() × N                → z.string().email()   (same refinement kept)
 ```
 
 ---
@@ -112,6 +179,7 @@ z.string().email() × N             → z.string().email()   (same refinement ke
 | **strict** | Add `.strict()` to all objects (rejects unknown keys) |
 | **enum detect** | Auto-detect enums from repeated string values |
 | **pattern detect** | Map string values to Zod format validators |
+| **coerce strings** | Promote numeric strings to `z.coerce.number()` (opt-in; off by default) |
 | **import** | Prepend `import { z } from "zod"` |
 
 ---
@@ -141,6 +209,19 @@ export function parseUser(data: unknown): User {
 export function safeParseUser(data: unknown) {
   return userSchema.safeParse(data);
 }
+```
+
+### Recursive schema
+```ts
+interface Category {
+  name: string;
+  children: Category[];
+}
+
+export const categorySchema: z.ZodType<Category> = z.object({
+  name: z.string(),
+  children: z.array(z.lazy(() => categorySchema)),
+});
 ```
 
 ---
