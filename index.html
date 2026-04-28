@@ -136,7 +136,7 @@ textarea::placeholder{color:var(--txt3);font-style:italic}
     <div class="logo-badge">ZOD PRO</div>
     <div>
       <div class="logo-title">JSON to Zod Pro</div>
-      <div class="logo-sub">intelligent typescript schema generator</div>
+      <div class="logo-sub">intelligent typescript schema generator · v8</div>
     </div>
   </div>
   <div class="header-right">
@@ -161,6 +161,7 @@ textarea::placeholder{color:var(--txt3);font-style:italic}
   <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('mixedArray')">mixed array ★</button>
   <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('deepNested')">deep nested ★</button>
   <button class="sample-btn" style="border-color:#6366f155;color:var(--acc2)" onclick="loadSample('patterns')">all patterns ★</button>
+  <button class="sample-btn" style="border-color:#10b98155;color:var(--ok)" onclick="loadSample('friends')">friends array ✦</button>
 </div>
 
 <!-- OPTIONS -->
@@ -192,6 +193,7 @@ textarea::placeholder{color:var(--txt3);font-style:italic}
   <label class="toggle"><input type="checkbox" id="optStrict" onchange="regenerate()"> strict</label>
   <label class="toggle"><input type="checkbox" id="optEnum" checked onchange="regenerate()"> enum detect</label>
   <label class="toggle"><input type="checkbox" id="optPattern" checked onchange="regenerate()"> pattern detect</label>
+  <label class="toggle"><input type="checkbox" id="optCoerce" onchange="regenerate()"> coerce strings</label>
   <label class="toggle"><input type="checkbox" id="optImport" checked onchange="regenerate()"> import</label>
 </div>
 
@@ -273,16 +275,8 @@ optional field detection.'
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  JSON TO ZOD PRO — Engine v7.0
-//
-//  v4  Root array per-key type union; correct key quoting; null as union member
-//  v5  widenTypes() — int+float→number, email+string→string, same refinement kept
-//  v6  inferNullableBase() — null fields infer semantic base type (not z.null())
-//      DISC_PREFERRED bypass cardinality ratio for discriminatedUnion
-//      ENUM_HINT_KEYS — bounded string fields suggest z.enum
-//  v7  DFS path-based recursion — fixes false positive on repeated siblings
-//      z.enum([value]) for single-value ENUM_HINT_KEYS fields
-//      Token-based syntax highlighter (no double-processing artifacts)
+//  JSON TO ZOD PRO — Engine v8.0
+//  BUG FIXES & NEW FEATURES — production-ready overhaul
 // ═══════════════════════════════════════════════════════════════
 
 // ─────────────── STATE ────────────────────────────────────────
@@ -378,6 +372,88 @@ patterns:`{
   "website": "https://github.com/project",
   "uuid": "550e8400-e29b-41d4-a716-446655440000"
 }`,
+friends:`[
+  {
+    "_id": "507f1f77bcf86cd799439011",
+    "index": 0,
+    "guid": "550e8400-e29b-41d4-a716-446655440000",
+    "isActive": true,
+    "balance": "\$1,234.56",
+    "picture": "http://placehold.it/32x32",
+    "age": 28,
+    "eyeColor": "blue",
+    "name": "Alice Johnson",
+    "gender": "female",
+    "company": "ACME Corp",
+    "email": "alice@example.com",
+    "phone": "+1 (555) 123-4567",
+    "address": "123 Main St, Springfield IL",
+    "about": "Lorem ipsum dolor sit amet.",
+    "registered": "2014-06-20T12:34:56Z",
+    "latitude": 41.8781,
+    "longitude": -87.6298,
+    "tags": ["developer", "typescript"],
+    "friends": [
+      {"id": 0, "name": "Bob Smith", "alias": "Ace"},
+      {"id": 1, "name": "Carol White", "alias": "Alpha"},
+      {"id": 2, "name": "Dave Brown", "alias": "Shadow"}
+    ],
+    "metadata": {"lastLogin": null, "verified": true}
+  },
+  {
+    "_id": "507f1f77bcf86cd799439012",
+    "index": 1,
+    "guid": "550e8400-e29b-41d4-a716-446655440001",
+    "isActive": false,
+    "balance": "\$2,345.67",
+    "picture": "http://placehold.it/32x32",
+    "age": 35,
+    "eyeColor": "brown",
+    "name": "Bob Smith",
+    "gender": "male",
+    "company": "Initech",
+    "email": "bob@example.com",
+    "phone": "+1 (555) 987-6543",
+    "address": "456 Oak Ave, Chicago IL",
+    "about": "Consectetur adipiscing elit.",
+    "registered": "2016-03-15T08:00:00Z",
+    "latitude": 41.8827,
+    "longitude": -87.6233,
+    "tags": ["manager"],
+    "friends": [
+      {"id": 0, "name": "Alice Johnson", "alias": "Shadow"},
+      {"id": 1, "name": "Eve Black", "alias": "Ace"}
+    ],
+    "metadata": {"lastLogin": "2024-11-30T08:00:00Z", "verified": false}
+  },
+  {
+    "_id": "507f1f77bcf86cd799439013",
+    "index": 2,
+    "guid": "550e8400-e29b-41d4-a716-446655440002",
+    "isActive": true,
+    "balance": "\$987.00",
+    "picture": "http://placehold.it/32x32",
+    "age": 22,
+    "eyeColor": "green",
+    "name": "Carol White",
+    "gender": "female",
+    "company": "Umbrella Ltd",
+    "email": "carol@example.com",
+    "phone": "+1 (555) 246-8101",
+    "address": "789 Pine Rd, Shelbyville IL",
+    "about": "Sed do eiusmod tempor incididunt.",
+    "registered": "2019-11-01T00:00:00Z",
+    "latitude": 40.6501,
+    "longitude": -89.5801,
+    "tags": ["designer", "ux"],
+    "friends": [
+      {"id": 0, "name": "Dave Brown", "alias": "Alpha"},
+      {"id": 1, "name": "Bob Smith", "alias": "Shadow"},
+      {"id": 2, "name": "Alice Johnson", "alias": "Ace"}
+    ],
+    "metadata": {"lastLogin": "2025-01-15T10:00:00Z", "verified": true}
+  }
+]`,
 api:`{
   "success": true,
   "status": 200,
@@ -464,6 +540,33 @@ const PATTERNS = [
   { name:'jwt',       re: RE_JWT,   zod: 'z.string().jwt()' },
 ];
 
+/**
+ * BigInt heuristic:
+ *   Condition A — field name suggests a large integer ID (snowflake, bigint-style)
+ *   Condition B — value is a string of digits exceeding Number.MAX_SAFE_INTEGER
+ *
+ * JSON cannot encode bigint natively; it always arrives as a string.
+ * z.coerce.bigint() is the idiomatic Zod type: accepts string|number|bigint.
+ * We intentionally do NOT coerce arbitrary numeric strings (e.g. zip codes,
+ * phone numbers) — only values that provably exceed the safe integer range
+ * or whose key name explicitly signals a large integer.
+ */
+const RE_BIGINT_KEYS = /^(snowflake|twitterId|discordId|telegramId|flakeId|bigint|int64|uint64|largeId)$/i;
+const RE_DIGITS_ONLY = /^\d+$/;
+
+function isBigIntLike(key, value) {
+  if (typeof value !== 'string') return false;
+  if (!RE_DIGITS_ONLY.test(value)) return false;
+  // Leading zeros → always a code/ID string (account number, EAN, IBAN prefix…)
+  if (value[0] === '0') return false;
+  // Key name explicitly signals bigint
+  if (key && RE_BIGINT_KEYS.test(key)) return value.length >= 10;
+  // Value exceeds MAX_SAFE_INTEGER (more than 16 digits, or 16 digits and > limit)
+  if (value.length > 16) return true;
+  if (value.length === 16) return BigInt(value) > BigInt(Number.MAX_SAFE_INTEGER);
+  return false;
+}
+
 function detectPattern(key, value) {
   if (typeof value !== 'string' || value.length < 4) return null;
   // JWT must be checked before URL — both have dots but JWT has no slashes
@@ -472,6 +575,43 @@ function detectPattern(key, value) {
   }
   for (const p of PATTERNS) if (p.re.test(value)) return p;
   return null;
+}
+
+/**
+ * Returns true when BOTH conditions are met:
+ *   1. The field name semantically indicates a date/time value
+ *   2. The actual string value is parseable as a date (not NaN from Date.parse)
+ *      AND contains at least one digit sequence — prevents "Springfield IL" matching.
+ *
+ * Pure name-only heuristic was too aggressive (false positives like addresses,
+ * city names, or any free-text field on a date-named key).
+ * RE_ISO_LOOSE covers common non-strict ISO variants that RE_DT might miss.
+ */
+const RE_ISO_LOOSE = /^\d{4}[-/]\d{2}[-/]\d{2}|^\d{2}[-/]\d{2}[-/]\d{4}|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
+function isDateLikeKey(key) {
+  const k = key.toLowerCase();
+  return (
+    /(?:_at|at|time|date|timestamp|created|updated|deleted|modified|expir|issued|published|registered|login|logout|joined|born|started|ended)$/.test(k) ||
+    /^(?:created|updated|deleted|modified|started|ended|issued|published|registered|login|logout|joined|born|date|time)/.test(k)
+  );
+}
+
+function isDateLikeValue(value) {
+  if (typeof value !== 'string') return false;
+  // Must contain digits to avoid matching plain strings
+  if (!/\d/.test(value)) return false;
+  // Fast path: matches a loose ISO pattern
+  if (RE_ISO_LOOSE.test(value)) return true;
+  // Fallback: Date.parse — but only trust it when the result is a reasonable epoch
+  // (> year 1000) to avoid false positives on short numeric strings like "500"
+  const parsed = Date.parse(value);
+  if (isNaN(parsed)) return false;
+  // Reject if the string is purely numeric (would match epoch timestamps as dates, but
+  // those are number types in JSON, not strings — so this is mostly a safety net)
+  if (/^\d+$/.test(value.trim())) return false;
+  // Require the string has at least a plausible date shape (4-digit year or month/day)
+  return /\d{4}/.test(value) || /\d{1,2}[\/\-]\d{1,2}/.test(value);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -527,48 +667,119 @@ function fingerprint(obj) {
  * discriminant and key-factoring helpers.
  */
 function keyOverlap(keysA, keysB) {
-  const a = new Set(keysA), b = new Set(keysB);
-  const inter = [...a].filter(k => b.has(k)).length;
-  const union  = new Set([...a, ...b]).size;
-  return union === 0 ? 0 : inter / union;
+  const a = new Set(keysA);
+  const b = new Set(keysB);
+  let inter = 0;
+  // Iterate the smaller set for better average performance
+  const [smaller, larger] = a.size <= b.size ? [a, b] : [b, a];
+  for (const k of smaller) if (larger.has(k)) inter++;
+  const unionSize = a.size + b.size - inter;
+  return unionSize === 0 ? 0 : inter / unionSize;
 }
 
-/**
- * DFS-based recursive fingerprint detector.
- *
- * Maintains an ancestor stack (Set of fingerprints of all objects
- * currently open on the call stack). An object is recursive iff its
- * fingerprint is already in that stack when it is first visited.
- * Array items are treated as siblings — they extend the stack only
- * while their own children are being processed, never marking each
- * other as recursive.
- */
+// ═══════════════════════════════════════════════════════════════
+//  RECURSIVE SCHEMA DETECTION  v2
+//
+//  Two modes of recursion detection:
+//
+//  A. Exact fingerprint match (same sorted key set):
+//     {name, children:[{name, children:[...]}]} → classic tree
+//
+//  B. Near-identical shape (Jaccard key overlap >= RECURSIVE_OVERLAP_THRESHOLD):
+//     Handles trees where leaf nodes omit some keys (e.g. children:[])
+//     or where optional keys are missing at certain depths.
+//
+//  Both modes use DFS with an ancestor stack — array siblings are
+//  processed independently and never contaminate each other.
+//
+//  An empty array [] contributes no shape and is skipped.
+// ═══════════════════════════════════════════════════════════════
+const RECURSIVE_OVERLAP_THRESHOLD = 0.8; // 80% Jaccard = recursive
+
+// ═══════════════════════════════════════════════════════════════
+//  RECURSIVE FINGERPRINT DETECTION v2
+//
+//  Two kinds of recursion are detected:
+//
+//  A. Ancestor-chain recursion (DFS path):
+//     An object whose key-set has ≥ RECURSIVE_OVERLAP_THRESHOLD Jaccard
+//     overlap with any open ancestor on the current DFS path.
+//     Example: tree nodes { name, children: [...same shape...] }
+//
+//  B. Array-item recursion (sibling scan):
+//     An array field whose items have high key-overlap with the object
+//     that CONTAINS the array. This catches `children: [{children:[...]}]`
+//     where the array items are the same shape as the parent.
+//
+//  Safety: depth is capped at MAX_DETECT_DEPTH (20) to prevent
+//  stack overflow on pathologically deep JSON. Visited fps are memoized
+//  to skip re-processing structurally identical subtrees.
+// ═══════════════════════════════════════════════════════════════
+const MAX_DETECT_DEPTH = 20;
+
 function findRecursiveFingerprints(root) {
   const recursive = new Set();
-  const ancestors = new Set(); // fps of objects currently open on the DFS stack
+  const visited   = new Set(); // memoize: skip identical shapes already scanned
+  const ancestors = [];
 
-  function dfs(v) {
-    if (!v || typeof v !== 'object') return;
-    if (Array.isArray(v)) {
-      // Siblings: process each independently without contaminating the stack
-      v.forEach(dfs);
-      return;
-    }
-    const fp = fingerprint(v);
-    if (!fp) return;
-
-    if (ancestors.has(fp)) {
-      // The same shape is already open above us on the stack → true recursion
-      recursive.add(fp);
-      return; // stop: no need to recurse further into a known cycle
-    }
-
-    ancestors.add(fp);
-    Object.values(v).forEach(dfs);
-    ancestors.delete(fp); // backtrack: leaving this object's scope
+  function overlap(keysA, keysB) {
+    const a = new Set(keysA), b = new Set(keysB);
+    let inter = 0;
+    for (const k of a) if (b.has(k)) inter++;
+    return inter / (a.size + b.size - inter || 1);
   }
 
-  dfs(root);
+  function dfs(v, depth) {
+    if (!v || typeof v !== 'object' || depth > MAX_DETECT_DEPTH) return;
+
+    if (Array.isArray(v)) {
+      const objItems = v.filter(x => x && typeof x === 'object' && !Array.isArray(x));
+      const arrItems = v.filter(Array.isArray);
+      objItems.forEach(x => dfs(x, depth + 1));
+      arrItems.forEach(x => dfs(x, depth + 1));
+      return;
+    }
+
+    const keys = Object.keys(v).sort();
+    if (keys.length === 0) return;
+    const fp = keys.join('|');
+
+    // ── A. Ancestor-chain recursion ──────────────────────────────
+    for (const anc of ancestors) {
+      const ov = overlap(keys, anc.keys);
+      if (ov >= RECURSIVE_OVERLAP_THRESHOLD) {
+        recursive.add(anc.fp); // canonical fp = first ancestor with that shape
+        recursive.add(fp);
+        return; // stop descent — we've confirmed recursion
+      }
+    }
+
+    // ── B. Array-item recursion ──────────────────────────────────
+    // For each array value in this object, check if its items resemble the object itself
+    for (const [k, child] of Object.entries(v)) {
+      if (!Array.isArray(child)) continue;
+      const samples = child.filter(x => x && typeof x === 'object' && !Array.isArray(x));
+      if (samples.length === 0) continue;
+      const sample = samples[0];
+      const sampleKeys = Object.keys(sample).sort();
+      const ov = overlap(keys, sampleKeys);
+      if (ov >= RECURSIVE_OVERLAP_THRESHOLD) {
+        recursive.add(fp);
+        recursive.add(sampleKeys.join('|'));
+        // Don't return — continue scanning other fields
+      }
+    }
+
+    // ── Skip already-fully-scanned identical shapes ──────────────
+    if (visited.has(fp)) return;
+    visited.add(fp);
+
+    ancestors.push({ fp, keys });
+    for (const child of Object.values(v)) dfs(child, depth + 1);
+    ancestors.pop();
+  }
+
+  dfs(root, 0);
   return recursive;
 }
 
@@ -599,28 +810,33 @@ const FACTOR_THRESHOLD       = 0.65;
 function findDiscriminant(items) {
   const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
   if (objs.length < 2) return null;
-  const candidateKeys = Object.keys(objs[0]).filter(k =>
-    objs.every(o => k in o && typeof o[k] === 'string')
+
+  // Cache keys per object once — avoids O(n * candidates) repeated Object.keys() calls
+  const keysets = objs.map(o => Object.keys(o));
+
+  // Candidates: keys present in ALL items with string values everywhere
+  const candidateKeys = keysets[0].filter(k =>
+    objs.every((o, i) => keysets[i].includes(k) && typeof o[k] === 'string')
   );
+
   function score(k) {
     const i = DISC_PREFERRED.indexOf(k.toLowerCase());
     return i >= 0 ? i : DISC_PREFERRED.length;
   }
+
+  // Pre-compute unique values per key once; avoid repeated .map() inside filter
   const valid = candidateKeys
     .filter(k => {
       if (DISC_IDENTIFIER_KEYS.test(k)) return false;
       const vals = objs.map(o => o[k]);
       const uniq = new Set(vals);
-      if (uniq.size < 2) return false;
-      if (uniq.size > DISC_MAX_UNIQUE) return false;
-      // Cardinality ratio guard: skip for DISC_PREFERRED keys.
-      // "type","kind","action" etc. naturally have 1 unique value per variant —
-      // a ratio of 1.0 is expected and correct for these semantic discriminants.
+      if (uniq.size < 2 || uniq.size > DISC_MAX_UNIQUE) return false;
       const isPreferred = DISC_PREFERRED.includes(k.toLowerCase());
       if (!isPreferred && uniq.size / objs.length > DISC_CARDINALITY_RATIO) return false;
       return true;
     })
     .sort((a, b) => score(a) - score(b));
+
   return valid[0] ?? null;
 }
 
@@ -645,47 +861,37 @@ function toNaming(key) {
 //  When multiple Zod types are collected across array items or
 //  multi-sample merging, apply the least-upper-bound (supertype):
 //
-//    z.number().int() + z.number()        → z.number()
-//    z.string().email() + z.string()      → z.string()
+//    z.number().int() + z.number()         → z.number()
+//    z.string().email() + z.string()       → z.string()
 //    z.string().email() + z.string().url() → z.string()
-//    z.string().email() × N (all same)    → z.string().email()  (kept)
-//    z.number().int() × N (all same)      → z.number().int()    (kept)
+//    z.string().email() × N (all same)     → z.string().email()  (kept)
+//    z.number().int()  × N (all same)      → z.number().int()    (kept)
 //
-//  The function also deduplicates the set after widening.
+//  Single-pass, no recursion. O(n) where n = unique type strings.
 // ═══════════════════════════════════════════════════════════════
 function widenTypes(types) {
-  if (types.length === 0) return types;
-  const set = [...new Set(types)]; // deduplicate first
+  if (types.length <= 1) return types;
 
-    const hasNumber    = set.includes('z.number()');
-  const hasNumberInt = set.includes('z.number().int()');
-  if (hasNumber && hasNumberInt) {
-    // int + float seen together → widen to plain number
-    const without = set.filter(t => t !== 'z.number().int()');
-    return widenTypes(without); // recurse in case other types remain
+  const set = new Set(types); // deduplicate
+
+  // Widen int + float → number
+  if (set.has('z.number()') && set.has('z.number().int()')) {
+    set.delete('z.number().int()');
   }
 
-    // Partition: refined strings (z.string().X) vs plain z.string()
-  const isRefinedString = t => t.startsWith('z.string().') && t !== 'z.string()';
-  const refinedStrings  = set.filter(isRefinedString);
-  const hasPlainString  = set.includes('z.string()');
-
-  if (refinedStrings.length > 0) {
-    if (hasPlainString) {
-      // Refined + plain → keep only z.string()
-      const without = set.filter(t => !isRefinedString(t));
-      return widenTypes(without);
+  // Widen refined strings
+  const isRefined = t => t.startsWith('z.string().') && t !== 'z.string()';
+  const refined = [...set].filter(isRefined);
+  if (refined.length > 0) {
+    if (set.has('z.string()') || refined.length > 1) {
+      // Any mix of plain + refined, or multiple different refinements → z.string()
+      for (const r of refined) set.delete(r);
+      set.add('z.string()');
     }
-    // Different refinements (email, url…) → widen to z.string()
-    const uniqueRefinements = [...new Set(refinedStrings)];
-    if (uniqueRefinements.length > 1) {
-      const withPlain = set.filter(t => !isRefinedString(t)).concat(['z.string()']);
-      return widenTypes([...new Set(withPlain)]);
-    }
-    // Identical refinements → keep the refinement
+    // else: single consistent refinement → keep it
   }
 
-  return set;
+  return [...set];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -699,9 +905,34 @@ function resolveZodType(key, value, opts, depth, ctx) {
   if (typeof value === 'boolean') return 'z.boolean()';
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return 'z.number()';
+    // A JSON number that equals or exceeds MAX_SAFE_INTEGER has already lost precision
+    // during JSON.parse — signal this with z.coerce.bigint() so the developer knows.
+    // Note: JSON.parse silently rounds numbers > 2^53-1, so >= MAX_SAFE_INTEGER is the
+    // conservative threshold (the value IS MAX_SAFE_INTEGER could itself be imprecise).
+    if (Number.isInteger(value) && Math.abs(value) >= Number.MAX_SAFE_INTEGER) {
+      ctx.patternCount++;
+      return 'z.coerce.bigint()';
+    }
     return Number.isInteger(value) ? 'z.number().int()' : 'z.number()';
   }
   if (typeof value === 'string') {
+    // BigInt detection: before all other checks
+    if (isBigIntLike(key, value)) {
+      ctx.patternCount++;
+      return 'z.coerce.bigint()';
+    }
+
+    // Coerce flag: numeric strings → z.coerce.number() or z.coerce.number().int()
+    // Only fires when: opt-in flag set, no leading zeros, not a pattern-matched field,
+    // not matched by bigint above. Helps with APIs that serialize numbers as strings.
+    if (opts.coerce && value.length > 0 && value[0] !== '0') {
+      const asNum = Number(value);
+      if (!isNaN(asNum) && isFinite(asNum) && !detectPattern(key, value)) {
+        ctx.patternCount++;
+        return Number.isInteger(asNum) ? 'z.coerce.number().int()' : 'z.coerce.number()';
+      }
+    }
+
         if (opts.enum && key) {
       const hints = ctx.enumHints[key] || [];
       if (isLikelyEnum(key, hints)) {
@@ -711,7 +942,6 @@ function resolveZodType(key, value, opts, depth, ctx) {
         return `z.enum([${vals.map(v => JSON.stringify(v)).join(', ')}])`;
       }
       // Single observed value on a semantically bounded field
-      // → z.enum([value]) gives TypeScript the literal type; developer can extend.
       if (ENUM_HINT_KEYS.test(key) && hints.length > 0) {
         const val = JSON.stringify(hints[0]);
         ctx.enumCount++;
@@ -722,6 +952,12 @@ function resolveZodType(key, value, opts, depth, ctx) {
       const pat = detectPattern(key, value);
       if (pat) { ctx.patternCount++; return pat.zod; }
     }
+    // Datetime inference from field name + value validation (fix 2):
+    // require BOTH a date-like key name AND a value that parses as a date.
+    // Name-only heuristic produced false positives on free-text fields.
+    if (key && isDateLikeKey(key) && isDateLikeValue(value)) {
+      return 'z.string().datetime({ offset: true })';
+    }
     return 'z.string()';
   }
   if (Array.isArray(value)) {
@@ -729,12 +965,29 @@ function resolveZodType(key, value, opts, depth, ctx) {
     return resolveArray(key, value, opts, depth, ctx);
   }
   if (typeof value === 'object') {
-    // Self-referential object: emit z.lazy() referencing the root schema
+    // Self-referential object: emit z.lazy() referencing the root schema.
+    // Matches both exact fp and near-identical fps registered by findRecursiveFingerprints.
     const fp = fingerprint(value);
     if (fp && ctx.recursiveFps && ctx.recursiveFps.has(fp)) {
       ctx.hasLazy = true;
       if (!ctx.lazyRefs.has(fp)) ctx.lazyRefs.set(fp, ctx.lazyName);
       return `z.lazy(() => ${ctx.lazyName}Schema)`;
+    }
+    // Near-identical check: any registered recursive fp with high overlap
+    if (ctx.recursiveFps && ctx.recursiveFps.size > 0) {
+      const keys = Object.keys(value).sort();
+      const curSet = new Set(keys);
+      for (const rfp of ctx.recursiveFps) {
+        const rfpKeys = new Set(rfp.split('|'));
+        let inter = 0;
+        for (const k of curSet) if (rfpKeys.has(k)) inter++;
+        const union = rfpKeys.size + curSet.size - inter;
+        if (union > 0 && inter / union >= RECURSIVE_OVERLAP_THRESHOLD) {
+          ctx.hasLazy = true;
+          if (!ctx.lazyRefs.has(rfp)) ctx.lazyRefs.set(rfp, ctx.lazyName);
+          return `z.lazy(() => ${ctx.lazyName}Schema)`;
+        }
+      }
     }
     return buildObject(value, opts, depth + 1, ctx);
   }
@@ -742,44 +995,68 @@ function resolveZodType(key, value, opts, depth, ctx) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  ARRAY RESOLVER
+//  ARRAY RESOLVER v8
 //
 //  Decision tree:
 //    1. Tuple      — all items are sub-arrays of the same fixed length
-//    2. Primitives — homogeneous or mixed; null becomes z.null() union member
-//    3. Objects    — try discriminatedUnion → key factoring → plain union
+//    2. Primitives — homogeneous or mixed; null becomes .nullable()
+//    3. Objects    — DEEP MERGE first → then discriminatedUnion / factored / single
 //    4. Mixed      — per-item type collection, deduplicate, widen, union
+//
+//  KEY CHANGE: For object arrays, always perform a deep merge across
+//  ALL items to compute "Common Minimum Type" before deciding structure.
+//  This eliminates the union-explosion bug where friends/metadata arrays
+//  generated dozens of redundant discriminatedUnion branches.
 // ═══════════════════════════════════════════════════════════════
 function resolveArray(key, items, opts, depth, ctx) {
-  if (!items.length) return 'z.array(z.unknown())';
+  if (!items.length) {
+    // Empty array literal passed directly. If we're inside a recursive schema,
+    // this is a base-case leaf — emit z.lazy() instead of z.unknown().
+    if (ctx && ctx.recursiveFps && ctx.recursiveFps.size > 0) {
+      ctx.hasLazy = true;
+      return `z.array(z.lazy(() => ${ctx.lazyName}Schema))`;
+    }
+    return 'z.array(z.unknown())';
+  }
 
-  // Tuple: all elements are sub-arrays of the same fixed length
+  // ── 1. Tuple / nested-arrays ──────────────────────────────────
   const allSubArrays = items.every(Array.isArray);
   if (allSubArrays) {
-    const lengths = [...new Set(items.map(a => a.length))];
+    const nonEmptyItems = items.filter(a => a.length > 0);
+    // If ALL are empty: z.array(z.unknown()) is the best we can do
+    if (nonEmptyItems.length === 0) return 'z.array(z.unknown())';
+
+    const lengths = [...new Set(nonEmptyItems.map(a => a.length))];
     if (lengths.length === 1 && lengths[0] > 0 && lengths[0] < 10) {
+      // Fixed-length non-empty arrays → tuple
       const tupleLen = lengths[0];
       const tupleSchemas = [];
       for (let i = 0; i < tupleLen; i++) {
-        const posVals = items.map(a => a[i]);
+        const posVals = nonEmptyItems.map(a => a[i]);
         const types = [...new Set(posVals.map(v => resolveZodType(`${key}[${i}]`, v, opts, depth + 1, ctx)))];
         tupleSchemas.push(types.length === 1 ? types[0] : `z.union([${types.join(', ')}])`);
       }
       return `z.tuple([${tupleSchemas.join(', ')}])`;
     }
+    // Variable-length or >10 elements: flatten non-empty items and resolve as flat array.
+    // Empty sub-arrays [] contribute no type info and must not produce z.unknown().
+    const flattened = nonEmptyItems.flat();
+    return resolveArray(key, flattened, opts, depth, ctx);
   }
 
   const allObjects    = items.every(v => v !== null && typeof v === 'object' && !Array.isArray(v));
   const allPrimitives = items.every(v => typeof v !== 'object' || v === null);
 
-    if (allPrimitives) {
-    // null becomes a z.null() union member, not .nullable() on other types
+  // ── 2. Primitives ─────────────────────────────────────────────
+  if (allPrimitives) {
     const types = widenTypes([...new Set(items.map(v => resolveZodType(null, v, opts, depth + 1, ctx)))]);
     if (types.length === 1) return `z.array(${types[0]})`;
     return `z.array(z.union([${types.join(', ')}]))`;
   }
 
-    if (allObjects && items.length >= 2) {
+  // ── 3. Objects ────────────────────────────────────────────────
+  if (allObjects && items.length >= 1) {
+    // Check if there is a clean discriminant AND the branches are meaningfully distinct
     const disc = findDiscriminant(items);
     if (disc) {
       const groups = new Map();
@@ -788,33 +1065,118 @@ function resolveArray(key, items, opts, depth, ctx) {
         if (!groups.has(tag)) groups.set(tag, []);
         groups.get(tag).push(item);
       }
-      if (groups.size >= 2) {
-        const branches = [];
-        for (const [tag, group] of groups) {
-          const merged = mergedSample(group);
-          branches.push(buildObjectWithLiteral(merged, disc, tag, opts, depth + 1, ctx, group));
+
+      // Reject discriminatedUnion if any tag is empty string (semantically useless)
+      // or if only 1 unique tag was found
+      const tags = [...groups.keys()];
+      const hasEmptyTag = tags.some(t => t === '');
+      const tooFewTags  = tags.length < 2;
+
+      if (!hasEmptyTag && !tooFewTags) {
+        // Check structural divergence: if all branches have same non-disc keys,
+        // collapse to a single merged object instead of discriminatedUnion
+        const branchKeysets = tags.map(t => {
+          const g = groups.get(t);
+          return new Set(g.flatMap(o => Object.keys(o)).filter(k => k !== disc));
+        });
+        const allSameKeys = branchKeysets.every(ks => {
+          const arr = [...ks];
+          const ref = [...branchKeysets[0]];
+          return arr.length === ref.length && arr.every(k => branchKeysets[0].has(k));
+        });
+
+        if (allSameKeys) {
+          // Branches share the same key set — only the discriminant value differs.
+          // Collapse to a single object where disc field is z.enum([...]).
+          // This is always cleaner than a discriminatedUnion of structurally
+          // identical branches regardless of how many tags there are.
+          const tagEnum = tags.length <= 8
+            ? `z.enum([${tags.map(t => JSON.stringify(t)).join(', ')}])`
+            : 'z.string()';
+          const reprGroup = groups.get(tags[0]);
+          const merged = deepMergeItems(reprGroup);
+          ctx.enumCount++;
+          return `z.array(${buildObjectWithEnum(merged, disc, tagEnum, opts, depth + 1, ctx)})`;
         }
-        ctx.discUnionCount = (ctx.discUnionCount || 0) + 1;
-        return `z.array(\n  z.discriminatedUnion(${JSON.stringify(disc)}, [\n    ${branches.join(',\n    ')}\n  ])\n)`;
+
+        // Genuine discriminatedUnion: branches have structurally different keys.
+        // e.g. { type:"success", data:... } vs { type:"error", error_code:... }
+        // Here discriminatedUnion is semantically correct and expressive.
+        {
+          const branches = [];
+          for (const [tag, group] of groups) {
+            const merged = deepMergeItems(group);
+            branches.push(buildObjectWithLiteral(merged, disc, tag, opts, depth + 1, ctx, group));
+          }
+          ctx.discUnionCount = (ctx.discUnionCount || 0) + 1;
+          return `z.array(\n  z.discriminatedUnion(${JSON.stringify(disc)}, [\n    ${branches.join(',\n    ')}\n  ])\n)`;
+        }
       }
     }
-    // Similar shapes but no clean discriminant → key factoring
-    if (avgOverlap(items) >= FACTOR_THRESHOLD) {
-      const { commonKeys, variantKeys, objs } = mergeObjectShapes(items);
-      return `z.array(${buildObjectFactored(objs[0], commonKeys, variantKeys, objs, opts, depth + 1, ctx)})`;
-    }
-    // Too different for factoring → plain z.union([...])
-    const shapes = deduplicateShapes(items);
-    if (shapes.length === 1) return `z.array(${buildObject(shapes[0], opts, depth + 1, ctx)})`;
-    return `z.array(z.union([${shapes.map(s => buildObject(s, opts, depth + 1, ctx)).join(', ')}]))`;
+
+    // No clean discriminant (or rejected) → always use deep-merge-first approach.
+    // This is the core fix: instead of treating each item in isolation, we compute
+    // the Common Minimum Type across ALL items, marking absent fields .optional()
+    // and null-only fields .nullable(). This prevents the union explosion.
+    return `z.array(${buildObjectFromItems(items, opts, depth + 1, ctx)})`;
   }
 
-  // ── Mixed array (objects + primitives + nested arrays + null) ───────────────
-  // Each element is resolved independently; null becomes a z.null() union member.
+  // ── 4. Mixed array (objects + primitives + nested arrays + null) ──────────
   const rawTypes = items.map(v => resolveZodType(null, v, opts, depth + 1, ctx));
-  const types    = widenTypes([...new Set(rawTypes)]); // deduplicate + widen
+  const types    = widenTypes([...new Set(rawTypes)]);
   if (types.length === 1) return `z.array(${types[0]})`;
   return `z.array(z.union([${types.join(', ')}]))`;
+}
+
+/**
+ * Deep-merge all items in an object array.
+ * Unlike mergedSample (which stops at first non-null per key),
+ * this collects ALL distinct values per key for accurate type analysis.
+ */
+function deepMergeItems(items) {
+  const merged = {};
+  for (const o of items) {
+    for (const [k, v] of Object.entries(o)) {
+      // Prefer first non-null value as representative sample
+      if (!(k in merged) || merged[k] === null) merged[k] = v;
+    }
+  }
+  return merged;
+}
+
+/**
+ * Build a z.object() where one field is replaced by a pre-computed enum schema.
+ * Used when discriminatedUnion branches are structurally identical (only disc value differs).
+ */
+function buildObjectWithEnum(obj, enumKey, enumSchema, opts, depth, ctx) {
+  const indent = '  '.repeat(depth);
+  const inner  = '  '.repeat(depth + 1);
+  const keys   = Object.keys(obj);
+  ctx.fieldCount += keys.length;
+
+  const lines = keys.map(rawKey => {
+    const key = formatKey(rawKey);
+    let zodT;
+    if (rawKey === enumKey) {
+      zodT = enumSchema;
+    } else {
+      const val = obj[rawKey];
+      zodT = resolveZodType(rawKey, val, opts, depth, ctx);
+      if (val === null && opts.nullable) {
+        zodT = `${inferNullableBase(rawKey)}.nullable()`;
+      }
+    }
+    let out = '';
+    if (opts.comments) {
+      const cmt = rawKey === enumKey ? 'discriminant field' : autoComment(rawKey, obj[rawKey]);
+      if (cmt) out += `${inner}/** ${cmt} */\n`;
+    }
+    out += `${inner}${key}: ${zodT},`;
+    return out;
+  });
+
+  const strict = opts.strict ? '.strict()' : '';
+  return `z.object({\n${lines.join('\n')}\n${indent}})${strict}`;
 }
 
 // ─────────────── HELPERS ──────────────────────────────────────
@@ -828,6 +1190,24 @@ function mergedSample(objs) {
   return merged;
 }
 
+/**
+ * For a set of objects, collect per-key metadata needed for CMT computation.
+ * Returns { allValues, present, nonNull, hasNull, isOpt } per key.
+ */
+function collectPerKeyData(items) {
+  const allKeys = [...new Set(items.flatMap(o => Object.keys(o)))];
+  const perKey  = {};
+  for (const k of allKeys) {
+    const observed = items.map(o => o[k]);
+    const present  = observed.filter(v => v !== undefined);
+    const hasNull  = present.some(v => v === null);
+    const isOpt    = observed.some(v => v === undefined);
+    const nonNull  = present.filter(v => v !== null);
+    perKey[k] = { observed, present, nonNull, hasNull, isOpt };
+  }
+  return perKey;
+}
+
 function deduplicateShapes(items) {
   const seen = new Set();
   return items.filter(item => {
@@ -839,19 +1219,29 @@ function deduplicateShapes(items) {
 
 function mergeObjectShapes(items) {
   const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
-  const allKeys = new Set(objs.flatMap(o => Object.keys(o)));
-  const commonKeys  = [...allKeys].filter(k => objs.every(o => k in o));
-  const variantKeys = [...allKeys].filter(k => !objs.every(o => k in o));
+  const n = objs.length;
+  // Single pass: count how many objects contain each key
+  const keyCount = new Map();
+  for (const o of objs) {
+    for (const k of Object.keys(o)) keyCount.set(k, (keyCount.get(k) || 0) + 1);
+  }
+  const commonKeys  = [];
+  const variantKeys = [];
+  for (const [k, cnt] of keyCount) {
+    (cnt === n ? commonKeys : variantKeys).push(k);
+  }
   return { commonKeys, variantKeys, objs };
 }
 
 function avgOverlap(items) {
   const objs = items.filter(v => v && typeof v === 'object' && !Array.isArray(v));
   if (objs.length < 2) return 1;
+  // Cache key arrays once — avoids O(n²) repeated Object.keys() calls
+  const keyArrays = objs.map(o => Object.keys(o));
   let total = 0, count = 0;
-  for (let i = 0; i < objs.length; i++) {
-    for (let j = i + 1; j < objs.length; j++) {
-      total += keyOverlap(Object.keys(objs[i]), Object.keys(objs[j]));
+  for (let i = 0; i < keyArrays.length; i++) {
+    for (let j = i + 1; j < keyArrays.length; j++) {
+      total += keyOverlap(keyArrays[i], keyArrays[j]);
       count++;
     }
   }
@@ -868,46 +1258,103 @@ function avgOverlap(items) {
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * FIX 1 — Per-key type union for root array items.
+ * CMT — Common Minimum Type builder for root arrays of objects.
  *
- * When a root JSON is an array of objects, each key may have
- * different types across items (e.g., id: 101 | "UUID-102" | 103).
- * This function collects ALL values for each key across all items,
- * then resolves to a union if types differ, and marks keys absent
- * in some items as optional.
+ * v8 CORE FIX: instead of per-item isolation (which caused union explosion),
+ * this function:
+ *  1. Collects ALL values for each key across every item
+ *  2. Widens types (int+float→number, email+string→string)
+ *  3. Emits .nullable() when some values are null
+ *  4. Emits .optional() when some items lack the key entirely
+ *  5. Runs enum inference across all collected string values
+ *  6. Never emits a z.union([...]) for object-type fields — instead
+ *     recurses via buildObjectFromItems for nested arrays-of-objects
+ *
+ * This produces a single, clean z.object({}) for the entire array,
+ * no matter how many items are in the input.
  */
 function buildObjectFromItems(items, opts, depth, ctx) {
   const indent = '  '.repeat(depth);
   const inner  = '  '.repeat(depth + 1);
 
-    const allKeys = [...new Set(items.flatMap(o => Object.keys(o)))];
-  ctx.fieldCount += allKeys.length;
+  const perKey = collectPerKeyData(items);
+  ctx.fieldCount += Object.keys(perKey).length;
 
-  const lines = allKeys.map(rawKey => {
+  const lines = Object.entries(perKey).map(([rawKey, { nonNull, hasNull, isOpt }]) => {
     const key = formatKey(rawKey);
 
-        const observed  = items.map(o => o[rawKey]); // undefined if absent
-    const present   = observed.filter(v => v !== undefined);
-    const isAbsent  = observed.some(v => v === undefined);   // key missing in some items
-    const hasNull   = present.some(v => v === null);          // null in some items
-    const nonNull   = present.filter(v => v !== null);
-
-        let zodT;
+    let zodT;
     if (nonNull.length === 0) {
-      // All observed values are null: infer base type from field name
+      // All observed values are null → infer base from field name
       zodT = opts.nullable
         ? `${inferNullableBase(rawKey)}.nullable()`
         : 'z.unknown()';
     } else {
-            const rawTypes = nonNull.map(v => resolveZodType(rawKey, v, opts, depth, ctx));
-      const uniqTypes = widenTypes([...new Set(rawTypes)]); // Bug1+4: widen before union
-      zodT = uniqTypes.length === 1 ? uniqTypes[0] : `z.union([${uniqTypes.join(', ')}])`;
-            if (hasNull && opts.nullable && !zodT.includes('.nullable()')) {
-        zodT += '.nullable()';
+      // Collect types from all non-null values
+      // Special case: if all non-null values are objects, recurse via buildObjectFromItems
+      const allNonNullObjects = nonNull.every(v => v && typeof v === 'object' && !Array.isArray(v));
+      const allNonNullArrays  = nonNull.every(v => Array.isArray(v));
+
+      if (allNonNullObjects && nonNull.length >= 1) {
+        // Recurse: build CMT for the nested objects
+        zodT = buildObjectFromItems(nonNull, opts, depth + 1, ctx);
+        ctx.fieldCount -= Object.keys(nonNull[0] || {}).length; // avoid double-counting
+      } else if (allNonNullArrays) {
+        ctx.arrayCount++;
+        // Flatten non-empty sub-arrays only. Empty arrays [] carry no type information
+        // and must not suppress the type inferred from populated sibling arrays.
+        const nonEmptyArrays = nonNull.filter(a => a.length > 0);
+        const allSubItems = nonEmptyArrays.flat();
+        if (allSubItems.length) {
+          zodT = resolveArray(rawKey, allSubItems, opts, depth, ctx);
+        } else {
+          // Every observed value for this key is []. Two cases:
+          // 1. The field is a recursive array (e.g. children:[] in a tree) — emit z.lazy()
+          // 2. Genuinely always-empty — emit z.array(z.unknown()) as last resort
+          // Heuristic: if the containing object's items have a recursive fingerprint
+          // registered, this empty array is almost certainly the base-case of that recursion.
+          const isRecursiveCtx = ctx.recursiveFps && ctx.recursiveFps.size > 0;
+          if (isRecursiveCtx) {
+            ctx.hasLazy = true;
+            zodT = `z.array(z.lazy(() => ${ctx.lazyName}Schema))`;
+          } else {
+            zodT = 'z.array(z.unknown())';
+          }
+        }
+      } else {
+        // Enum inference: collect all string values for this key across items
+        if (opts.enum) {
+          const strVals = nonNull.filter(v => typeof v === 'string');
+          if (strVals.length >= 2) {
+            const uniq = [...new Set(strVals)];
+            // isLikelyEnum checks cardinality ratio internally
+            if (isLikelyEnum(rawKey, strVals)) {
+              ctx.enumCount++;
+              zodT = `z.enum([${uniq.map(v => JSON.stringify(v)).join(', ')}])`;
+            }
+          }
+          if (!zodT && ENUM_HINT_KEYS.test(rawKey) && nonNull.every(v => typeof v === 'string')) {
+            const uniq = [...new Set(nonNull)];
+            if (uniq.length <= 8) {
+              ctx.enumCount++;
+              zodT = `z.enum([${uniq.map(v => JSON.stringify(v)).join(', ')}])`;
+            }
+          }
+        }
+
+        if (!zodT) {
+          const rawTypes = nonNull.map(v => resolveZodType(rawKey, v, opts, depth, ctx));
+          const uniqTypes = widenTypes([...new Set(rawTypes)]);
+          zodT = uniqTypes.length === 1 ? uniqTypes[0] : `z.union([${uniqTypes.join(', ')}])`;
+        }
+
+        if (hasNull && opts.nullable && !zodT.includes('.nullable()')) {
+          zodT += '.nullable()';
+        }
       }
     }
 
-        if (isAbsent && opts.optional && !zodT.endsWith('.optional()')) {
+    if (isOpt && opts.optional && !zodT.endsWith('.optional()')) {
       zodT += '.optional()';
     }
 
@@ -979,7 +1426,9 @@ function buildObjectWithLiteral(merged, discKey, discVal, opts, depth, ctx, grou
   const indent = '  '.repeat(depth);
   const inner  = '  '.repeat(depth + 1);
 
-  // Per-branch optionality: keys absent in some group members → .optional()
+  // Per-branch optionality: a field is optional ONLY when absent in some items
+  // of THIS branch. Cross-branch absence (field in success but not error) must
+  // NOT produce .optional() — it is required and characteristic of this variant.
   const groupOptKeys = new Set();
   if (group && group.length > 1) {
     const allBranchKeys = new Set(group.flatMap(o => Object.keys(o)));
@@ -988,29 +1437,44 @@ function buildObjectWithLiteral(merged, discKey, discVal, opts, depth, ctx, grou
     }
   }
 
+  const branchPerKey = group && group.length > 1 ? collectPerKeyData(group) : null;
   const keys = Object.keys(merged);
   ctx.fieldCount += keys.length;
 
   const lines = keys.map(rawKey => {
     const key = formatKey(rawKey);
     let zodT;
+
     if (rawKey === discKey) {
       zodT = `z.literal(${JSON.stringify(discVal)})`;
+    } else if (branchPerKey && branchPerKey[rawKey]) {
+      const { nonNull, hasNull } = branchPerKey[rawKey];
+      if (nonNull.length === 0) {
+        zodT = opts.nullable ? `${inferNullableBase(rawKey)}.nullable()` : 'z.unknown()';
+      } else {
+        const rawTypes = nonNull.map(v => resolveZodType(rawKey, v, opts, depth, ctx));
+        const uniq = widenTypes([...new Set(rawTypes)]);
+        zodT = uniq.length === 1 ? uniq[0] : `z.union([${uniq.join(', ')}])`;
+        if (hasNull && opts.nullable && !zodT.includes('.nullable()')) zodT += '.nullable()';
+      }
+      if (groupOptKeys.has(rawKey) && opts.optional && !zodT.endsWith('.optional()')) {
+        zodT += '.optional()';
+      }
     } else {
-      const val     = merged[rawKey];
-      const isNullV = val === null;
+      const val = merged[rawKey];
       zodT = resolveZodType(rawKey, val, opts, depth, ctx);
-      const isBranchOpt = groupOptKeys.has(rawKey);
-      const isGlobalOpt = opts.optional && ctx.optMap && ctx.optMap[rawKey];
-      if (isNullV && opts.nullable && (isBranchOpt || isGlobalOpt)) zodT = 'z.null().optional()';
-      else if (isNullV && opts.nullable)   zodT = 'z.null()';
-      else if (isBranchOpt || isGlobalOpt) zodT += '.optional()';
+      if (val === null && opts.nullable) zodT = `${inferNullableBase(rawKey)}.nullable()`;
+      if (groupOptKeys.has(rawKey) && opts.optional && !zodT.endsWith('.optional()')) {
+        zodT += '.optional()';
+      }
     }
+
     let out = '';
     if (opts.comments) {
-      const isBranchOpt = groupOptKeys.has(rawKey);
       const baseCmt = autoComment(rawKey, merged[rawKey]);
-      const cmt = isBranchOpt ? (baseCmt ? baseCmt + ' — present in some events' : 'present in some events') : baseCmt;
+      const cmt = groupOptKeys.has(rawKey)
+        ? (baseCmt ? baseCmt + ' — present in some events' : 'present in some events')
+        : baseCmt;
       if (cmt) out += `${inner}/** ${cmt} */\n`;
     }
     out += `${inner}${key}: ${zodT},`;
@@ -1023,14 +1487,15 @@ function buildObjectWithLiteral(merged, discKey, discVal, opts, depth, ctx, grou
 
 /** Build factored object for similar-shape arrays (no clean discriminant). */
 function buildObjectFactored(rep, commonKeys, variantKeys, allObjs, opts, depth, ctx) {
-  const indent  = '  '.repeat(depth);
-  const inner   = '  '.repeat(depth + 1);
-  const allKeys = [...new Set([...commonKeys, ...variantKeys])];
+  const indent    = '  '.repeat(depth);
+  const inner     = '  '.repeat(depth + 1);
+  const varKeySet = new Set(variantKeys); // O(1) lookup instead of O(n) .includes()
+  const allKeys   = [...commonKeys, ...variantKeys]; // already deduplicated by mergeObjectShapes
   ctx.fieldCount += allKeys.length;
 
   const lines = allKeys.map(rawKey => {
     const key    = formatKey(rawKey);
-    const isVar  = variantKeys.includes(rawKey);
+    const isVar  = varKeySet.has(rawKey); // O(1) Set lookup
 
     const observed  = allObjs.map(o => o[rawKey]).filter(v => v !== undefined);
     const nonNull   = observed.filter(v => v !== null);
@@ -1041,8 +1506,6 @@ function buildObjectFactored(rep, commonKeys, variantKeys, allObjs, opts, depth,
     let zodT;
 
     if (allNull) {
-      // All observed values were null: infer base type from field name.
-      // Never emit z.null() alone — it's useless for real data.
       zodT = opts.nullable
         ? `${inferNullableBase(rawKey)}.nullable()`
         : 'z.unknown()';
@@ -1080,9 +1543,9 @@ function buildObjectFactored(rep, commonKeys, variantKeys, allObjs, opts, depth,
  */
 function inferNullableBase(key) {
   const k = key.toLowerCase();
-  // Timestamp fields
-  if (/(?:_at|at|time|date|timestamp|created|updated|deleted|modified|expir|issued|published)$/.test(k) ||
-      /^(?:created|updated|deleted|modified|started|ended|issued|published)/.test(k)) {
+  // Timestamp / date fields — broad pattern to cover registered, lastLogin, joinedAt, etc.
+  if (/(?:_at|at|time|date|timestamp|created|updated|deleted|modified|expir|issued|published|registered|login|logout|joined|born|started|ended)$/.test(k) ||
+      /^(?:created|updated|deleted|modified|started|ended|issued|published|registered|login|date|time)/.test(k)) {
     return 'z.string().datetime({ offset: true })';
   }
   // URL/URI fields
@@ -1148,41 +1611,88 @@ function detectOptionals(objects) {
 }
 
 function collectEnums(objects) {
-  const hints = {};
+  const hints = Object.create(null); // null-proto avoids __proto__ key collisions
+  const seen  = new WeakSet();       // guard against circular references
   function collect(obj) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return;
-    for (const [k, v] of Object.entries(obj)) {
-      if (typeof v === 'string') { if (!hints[k]) hints[k] = []; hints[k].push(v); }
-      else if (Array.isArray(v)) v.forEach(collect);
-      else if (typeof v === 'object') collect(v);
+    if (seen.has(obj)) return;
+    seen.add(obj);
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      if (typeof v === 'string') {
+        if (!hints[k]) hints[k] = [];
+        hints[k].push(v);
+      } else if (Array.isArray(v)) {
+        for (const item of v) collect(item);
+      } else if (v && typeof v === 'object') {
+        collect(v);
+      }
     }
   }
-  objects.forEach(collect);
+  for (const o of objects) collect(o);
   return hints;
 }
 
 function getDepth(v, d = 0) {
   if (!v || typeof v !== 'object') return d;
-  if (Array.isArray(v)) return Math.max(d, ...v.map(x => getDepth(x, d + 1)));
-  const vals = Object.values(v);
-  if (!vals.length) return d;
-  return Math.max(d, ...vals.map(x => getDepth(x, d + 1)));
+  let max = d;
+  if (Array.isArray(v)) {
+    for (const x of v) { const depth = getDepth(x, d + 1); if (depth > max) max = depth; }
+  } else {
+    for (const x of Object.values(v)) { const depth = getDepth(x, d + 1); if (depth > max) max = depth; }
+  }
+  return max;
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  RECURSIVE INTERFACE GENERATOR
+//
+//  Produces the explicit TypeScript interface required by Zod when
+//  z.lazy() is used. z.infer<> cannot resolve circular types, so we
+//  emit a hand-written interface and annotate the schema as
+//  z.ZodType<InterfaceName>.
+//
+//  Handles:
+//  • Root objects and root arrays
+//  • Recursive fields detected in recursiveFps (emits the type name)
+//  • Arrays of recursive objects (emits TypeName[])
+//  • null values (emits field?: TypeName | null for structural hints)
 // ═══════════════════════════════════════════════════════════════
-function generateTsInterface(obj, typeName, depth, recursiveFps) {
+function generateTsInterface(root, typeName, depth, recursiveFps) {
+  // For root arrays, use the first non-null item as the representative shape
+  const obj = Array.isArray(root)
+    ? root.find(x => x && typeof x === 'object' && !Array.isArray(x))
+    : root;
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return '';
   const indent = '  '.repeat(depth);
+
   return Object.entries(obj).map(([k, v]) => {
     if (v === null) return `${indent}${k}?: ${typeName} | null;`;
+
     if (typeof v === 'object' && !Array.isArray(v)) {
       const fp = fingerprint(v);
-      if (fp && recursiveFps && recursiveFps.has(fp)) return `${indent}${k}?: ${typeName} | null;`;
+      if (fp && recursiveFps && recursiveFps.has(fp)) {
+        return `${indent}${k}?: ${typeName} | null;`;
+      }
       const inner = generateTsInterface(v, typeName, depth + 1, recursiveFps);
       return `${indent}${k}: {\n${inner}${indent}};`;
     }
+
+    if (Array.isArray(v)) {
+      const tsType = jsValToTs(v, typeName, recursiveFps);
+      // If the array items are the recursive type itself, make the field optional
+      // (leaf nodes will have []) and use TypeName[]
+      const isRecursiveArr = v.length > 0 && v.some(x => {
+        if (!x || typeof x !== 'object' || Array.isArray(x)) return false;
+        const fp = fingerprint(x);
+        return fp && recursiveFps && recursiveFps.has(fp);
+      });
+      if (isRecursiveArr || (v.length === 0 && recursiveFps && recursiveFps.size > 0)) {
+        return `${indent}${k}: ${typeName}[];`;
+      }
+      return `${indent}${k}: ${tsType};`;
+    }
+
     return `${indent}${k}: ${jsValToTs(v, typeName, recursiveFps)};`;
   }).join('\n') + '\n';
 }
@@ -1190,10 +1700,13 @@ function generateTsInterface(obj, typeName, depth, recursiveFps) {
 function jsValToTs(v, selfName, recursiveFps) {
   if (v === null) return 'null';
   if (typeof v === 'boolean') return 'boolean';
-  if (typeof v === 'number') return 'number';
+  if (typeof v === 'number') return Number.isInteger(v) ? 'number' : 'number';
   if (typeof v === 'string') return 'string';
   if (Array.isArray(v)) {
-    if (!v.length) return 'unknown[]';
+    if (!v.length) {
+      // Empty array in recursive context → selfName[]
+      return recursiveFps && recursiveFps.size > 0 ? `${selfName}[]` : 'unknown[]';
+    }
     const types = [...new Set(v.map(x => jsValToTs(x, selfName, recursiveFps)))];
     return types.length === 1 ? `${types[0]}[]` : `(${types.join(' | ')})[]`;
   }
@@ -1225,11 +1738,15 @@ function generateSchema() {
     strict:   document.getElementById('optStrict').checked,
     enum:     document.getElementById('optEnum').checked,
     pattern:  document.getElementById('optPattern').checked,
+    coerce:   document.getElementById('optCoerce').checked,
     import:   document.getElementById('optImport').checked,
   };
 
   const isRootArray = Array.isArray(parsed);
-  const notArr      = isRootArray ? [] : [parsed, ...extraSamples];
+  // For root arrays, use the items as extra enum/optional samples too
+  const notArr = isRootArray
+    ? (parsed.every(v => v && typeof v === 'object' && !Array.isArray(v)) ? parsed : [])
+    : [parsed, ...extraSamples];
   const recursiveFps = findRecursiveFingerprints(parsed);
 
   const ctx = {
@@ -1249,14 +1766,11 @@ function generateSchema() {
 
   let root;
   if (isRootArray) {
-    // Root array of objects: use per-key cross-item type union
-    const allAreObjects = parsed.every(v => v && typeof v === 'object' && !Array.isArray(v));
-    if (allAreObjects && parsed.length >= 2) {
-      // buildObjectFromItems collects all values per key and widens before union
-      root = `z.array(${buildObjectFromItems(parsed, opts, 0, ctx)})`;
-    } else {
-      root = resolveArray(null, parsed, opts, 0, ctx);
-    }
+    // Always route through resolveArray — it handles:
+    //   • discriminatedUnion when branches are structurally distinct (fix 3)
+    //   • enum-collapse when branches share all keys (diff only in disc value)
+    //   • CMT deep-merge fallback via buildObjectFromItems for homogeneous arrays
+    root = resolveArray(null, parsed, opts, 0, ctx);
   } else {
     root = buildObject(parsed, opts, 0, ctx);
   }
@@ -1267,10 +1781,15 @@ function generateSchema() {
 
   if (ctx.hasLazy) {
     out += `// Recursive schema — z.lazy() required for self-referential types\n`;
+    // For root arrays, the interface describes the item type (not the array wrapper)
+    const interfaceRoot = isRootArray
+      ? (parsed.find(x => x && typeof x === 'object' && !Array.isArray(x)) || parsed[0])
+      : parsed;
+    const zodTypeAnnotation = isRootArray ? `${PName}[]` : PName;
     out += `interface ${PName} {\n`;
-    out += generateTsInterface(parsed, PName, 1, recursiveFps);
+    out += generateTsInterface(interfaceRoot, PName, 1, recursiveFps);
     out += `}\n\n`;
-    out += `export const ${name}Schema: z.ZodType<${PName}> = ${root};\n`;
+    out += `export const ${name}Schema: z.ZodType<${zodTypeAnnotation}> = ${root};\n`;
   } else {
     if (mode === 'schema' || mode === 'both' || mode === 'validate') {
       out += `export const ${name}Schema = ${root};\n`;
